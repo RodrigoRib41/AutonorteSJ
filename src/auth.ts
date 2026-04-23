@@ -15,6 +15,7 @@ function asPassword(value: unknown) {
 }
 
 export const authConfig = {
+  trustHost: true,
   pages: {
     signIn: "/login",
   },

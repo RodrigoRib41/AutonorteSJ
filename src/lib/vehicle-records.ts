@@ -218,6 +218,17 @@ export type VehicleImageDeleteResponse =
       message: string;
     };
 
+export type VehicleBulkDeleteResponse =
+  | {
+      success: true;
+      deletedCount: number;
+      message: string;
+    }
+  | {
+      success: false;
+      message: string;
+    };
+
 export const emptyVehicleFormValues: VehicleFormValues = {
   marca: "",
   modelo: "",
@@ -396,6 +407,10 @@ export function validateVehiclePayload(
   return errors;
 }
 
+function toIsoString(value: Date | string) {
+  return value instanceof Date ? value.toISOString() : value;
+}
+
 export function serializeVehicleImage(
   image: Pick<
     VehicleImagePersisted,
@@ -423,7 +438,7 @@ export function serializeVehicleImage(
     height: image.height,
     format: image.format,
     bytes: image.bytes,
-    createdAt: image.createdAt.toISOString(),
+    createdAt: toIsoString(image.createdAt),
   };
 }
 
@@ -442,8 +457,8 @@ export function serializeVehicle(vehicle: VehiclePersisted): VehicleApiRecord {
     descripcion: vehicle.descripcion,
     destacado: vehicle.destacado,
     images: vehicle.images.map(serializeVehicleImage),
-    createdAt: vehicle.createdAt.toISOString(),
-    updatedAt: vehicle.updatedAt.toISOString(),
+    createdAt: toIsoString(vehicle.createdAt),
+    updatedAt: toIsoString(vehicle.updatedAt),
   };
 }
 

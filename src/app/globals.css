@@ -125,6 +125,7 @@
   html {
     @apply font-sans;
     overflow-x: hidden;
+    color-scheme: light;
   }
 
   body {
@@ -134,5 +135,12 @@
       linear-gradient(90deg, rgb(19 18 18 / 0.03) 1px, transparent 1px),
       linear-gradient(180deg, rgb(19 18 18 / 0.03) 1px, transparent 1px);
     background-size: 44px 44px;
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    color-scheme: light;
   }
 }

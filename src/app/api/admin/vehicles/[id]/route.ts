@@ -1,6 +1,5 @@
 import { getPrismaClient } from "@/lib/prisma";
 import { requireAdminApiAccess, vehicleManagerRoles } from "@/lib/admin-auth";
-import { buildVehicleAuditLogData } from "@/lib/vehicle-audit";
 import { revalidatePublicVehiclePages } from "@/lib/revalidation";
 import {
   buildFeaturedVehicleLimitMessage,
@@ -12,6 +11,8 @@ import {
   buildVehiclePayloadChangeSummary,
   buildVehicleRestorePointData,
 } from "@/lib/vehicle-restore-points";
+import { buildVehicleAuditLogData } from "@/lib/vehicle-audit";
+import { moveVehiclesToTrash } from "@/lib/vehicle-trash";
 import {
   type VehicleItemResponse,
   parseVehiclePayload,
@@ -257,16 +258,9 @@ export async function DELETE(
   const { id } = await params;
 
   try {
-    const prisma = getPrismaClient();
-    const existingVehicle = await prisma.vehicle.findFirst({
-      include: vehicleWithImagesInclude,
-      where: {
-        id,
-        deletedAt: null,
-      },
-    });
+    const deletedVehicles = await moveVehiclesToTrash([id], admin);
 
-    if (!existingVehicle) {
+    if (deletedVehicles.length === 0) {
       return Response.json(
         {
           success: false,
@@ -275,33 +269,6 @@ export async function DELETE(
         { status: 404 }
       );
     }
-
-    await prisma.$transaction(async (tx) => {
-      await tx.vehicleRestorePoint.create({
-        data: buildVehicleRestorePointData(
-          "DELETE",
-          admin,
-          existingVehicle,
-          new Date(),
-          "Se elimino el vehiculo completo."
-        ),
-      });
-
-      await tx.vehicleAuditLog.create({
-        data: buildVehicleAuditLogData("DELETE", admin, existingVehicle),
-      });
-
-      await tx.vehicle.update({
-        where: {
-          id,
-        },
-        data: {
-          deletedAt: new Date(),
-          deletedByUserId: admin.id,
-          updatedByUserId: admin.id,
-        },
-      });
-    });
 
     revalidatePublicVehiclePages(id);
 

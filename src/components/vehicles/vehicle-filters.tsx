@@ -20,7 +20,7 @@ type VehicleFiltersProps = {
 };
 
 const fieldClassName =
-  "h-12 w-full rounded-2xl border border-zinc-950/15 bg-white px-4 text-sm text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-[#f2c400] focus:ring-4 focus:ring-yellow-300/30";
+  "h-12 w-full rounded-xl border border-zinc-950/15 bg-white px-4 text-base text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-[#f2c400] focus:ring-4 focus:ring-yellow-300/30 sm:rounded-2xl sm:text-sm";
 
 export function VehicleFilters({
   actionPath,
@@ -40,7 +40,7 @@ export function VehicleFilters({
 
   return (
     <details className="group">
-      <summary className="inline-flex list-none cursor-pointer items-center gap-3 rounded-full border border-zinc-950 bg-zinc-950 px-4 py-3 text-sm font-medium text-[#f2c400] shadow-sm transition hover:bg-zinc-900 [&::-webkit-details-marker]:hidden">
+      <summary className="flex w-full list-none cursor-pointer items-center justify-center gap-3 rounded-full border border-zinc-950 bg-zinc-950 px-4 py-3 text-sm font-medium text-[#f2c400] shadow-sm transition hover:bg-zinc-900 sm:inline-flex sm:w-auto [&::-webkit-details-marker]:hidden">
         <span className="inline-flex items-center gap-2">
           <SlidersHorizontal className="size-4" />
           {hasFilters
@@ -50,7 +50,7 @@ export function VehicleFilters({
         <ChevronDown className="size-4 transition group-open:rotate-180" />
       </summary>
 
-      <div className="mt-4 rounded-[1.5rem] border border-zinc-950/15 bg-white p-5 shadow-[0_24px_60px_rgba(0,0,0,0.12)] sm:p-6">
+      <div className="mt-4 rounded-[1.25rem] border border-zinc-950/15 bg-white p-4 shadow-[0_18px_44px_rgba(0,0,0,0.1)] sm:rounded-[1.5rem] sm:p-6 sm:shadow-[0_24px_60px_rgba(0,0,0,0.12)]">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-medium text-zinc-700">
@@ -268,7 +268,7 @@ export function VehicleFilters({
             <Button
               type="submit"
               size="lg"
-              className="h-12 rounded-full bg-[#f2c400] px-6 text-zinc-950 hover:bg-yellow-300"
+              className="h-12 w-full rounded-full bg-[#f2c400] px-6 text-zinc-950 hover:bg-yellow-300 sm:w-auto"
             >
               Aplicar filtros
             </Button>
@@ -276,7 +276,7 @@ export function VehicleFilters({
               asChild
               size="lg"
               variant="outline"
-              className="h-12 rounded-full border-zinc-950 bg-white px-6 text-zinc-950 hover:bg-[#fff8d6]"
+              className="h-12 w-full rounded-full border-zinc-950 bg-white px-6 text-zinc-950 hover:bg-[#fff8d6] sm:w-auto"
             >
               <Link href={actionPath}>Limpiar filtros</Link>
             </Button>

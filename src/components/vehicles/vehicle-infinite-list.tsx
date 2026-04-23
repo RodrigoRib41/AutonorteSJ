@@ -128,23 +128,23 @@ export function VehicleInfiniteList({
   }, [hasMore, loadMore]);
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-5 sm:space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-semibold tracking-[0.24em] text-zinc-700 uppercase">
             {hasFilters ? "Resultados" : "Stock disponible"}
           </p>
-          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950 sm:text-3xl">
             Unidades disponibles
           </h2>
         </div>
-        <p className="text-sm text-zinc-600">
+        <p className="w-fit rounded-full border border-zinc-950/10 bg-white/80 px-3 py-2 text-sm text-zinc-600">
           Mostrando {vehicles.length} de {totalCount} unidad
           {totalCount === 1 ? "" : "s"}.
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
         {vehicles.map((vehicle, index) => (
           <VehicleCard
             key={vehicle.id}

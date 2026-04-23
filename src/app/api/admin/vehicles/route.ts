@@ -11,6 +11,7 @@ import {
   replaceFeaturedVehicleIfNeeded,
 } from "@/lib/vehicle-featured";
 import {
+  type VehicleBulkDeleteResponse,
   type VehicleItemResponse,
   type VehicleListResponse,
   parseVehiclePayload,
@@ -18,6 +19,10 @@ import {
   validateVehiclePayload,
   vehicleWithImagesInclude,
 } from "@/lib/vehicle-records";
+import {
+  moveVehiclesToTrash,
+  normalizeVehicleIds,
+} from "@/lib/vehicle-trash";
 
 export const runtime = "nodejs";
 
@@ -181,6 +186,91 @@ export async function POST(request: Request) {
             "No pudimos guardar el vehículo en este momento.",
       } satisfies VehicleItemResponse,
       { status: duplicatedVehicle ? 409 : 500 }
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  const { admin, response } = await requireAdminApiAccess(vehicleManagerRoles);
+
+  if (response) {
+    return response;
+  }
+
+  if (!admin) {
+    return Response.json(
+      { success: false, message: "No autorizado." } satisfies VehicleBulkDeleteResponse,
+      { status: 401 }
+    );
+  }
+
+  let rawBody: unknown;
+
+  try {
+    rawBody = await request.json();
+  } catch {
+    return Response.json(
+      {
+        success: false,
+        message: "No pudimos interpretar los vehiculos seleccionados.",
+      } satisfies VehicleBulkDeleteResponse,
+      { status: 400 }
+    );
+  }
+
+  const ids = normalizeVehicleIds(
+    rawBody && typeof rawBody === "object"
+      ? (rawBody as { ids?: unknown }).ids
+      : null
+  );
+
+  if (ids.length === 0) {
+    return Response.json(
+      {
+        success: false,
+        message: "Selecciona al menos un vehiculo para eliminar.",
+      } satisfies VehicleBulkDeleteResponse,
+      { status: 400 }
+    );
+  }
+
+  try {
+    const deletedVehicles = await moveVehiclesToTrash(ids, admin);
+
+    if (deletedVehicles.length === 0) {
+      return Response.json(
+        {
+          success: false,
+          message: "No encontramos vehiculos activos para eliminar.",
+        } satisfies VehicleBulkDeleteResponse,
+        { status: 404 }
+      );
+    }
+
+    for (const vehicle of deletedVehicles) {
+      revalidatePublicVehiclePages(vehicle.id);
+    }
+
+    return Response.json(
+      {
+        success: true,
+        deletedCount: deletedVehicles.length,
+        message:
+          deletedVehicles.length === 1
+            ? "Vehiculo movido a papelera. Podes restaurarlo durante los proximos 7 dias."
+            : `${deletedVehicles.length} vehiculos movidos a papelera. Podes restaurarlos durante los proximos 7 dias.`,
+      } satisfies VehicleBulkDeleteResponse,
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting vehicles in bulk", error);
+
+    return Response.json(
+      {
+        success: false,
+        message: "No pudimos eliminar los vehiculos seleccionados.",
+      } satisfies VehicleBulkDeleteResponse,
+      { status: 500 }
     );
   }
 }

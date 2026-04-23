@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
       process.env.CLOUDINARY_CLOUD_NAME ??
       "",
   },
-  serverExternalPackages: ["@prisma/client", ".prisma/client"],
+  serverExternalPackages: ["@prisma/client", ".prisma/client", "pg-cloudflare"],
   images: {
     deviceSizes: [360, 414, 640, 768, 1024, 1280, 1600, 1920],
     imageSizes: [80, 160, 240, 320, 480],

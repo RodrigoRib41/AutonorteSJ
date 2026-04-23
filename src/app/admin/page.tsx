@@ -21,6 +21,7 @@ import {
   getVehicleAuditActionLabel,
   getVehicleAuditActionSentence,
   getVehicleAuditActorLabel,
+  type VehicleAuditLogRecord,
 } from "@/lib/vehicle-audit";
 import {
   getActiveVehicleRestorePointCount,
@@ -190,7 +191,7 @@ export default async function AdminPage() {
           </div>
         ) : (
           <div className="mt-8 space-y-4">
-            {recentActivity.map((log) => (
+            {recentActivity.map((log: VehicleAuditLogRecord) => (
               <article
                 key={log.id}
                 className="rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-5"

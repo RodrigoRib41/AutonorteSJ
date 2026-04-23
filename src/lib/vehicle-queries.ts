@@ -6,7 +6,10 @@ import {
   type VehicleFilterValues,
 } from "@/lib/vehicle-filters";
 import { vehicleWithImagesInclude } from "@/lib/vehicle-records";
-import { vehicleAuditLogInclude } from "@/lib/vehicle-audit";
+import {
+  vehicleAuditLogInclude,
+  type VehicleAuditLogRecord,
+} from "@/lib/vehicle-audit";
 
 const activeVehicleWhere = {
   deletedAt: null,
@@ -80,7 +83,9 @@ export async function getVehicleBrands() {
   );
 }
 
-export async function getRecentVehicleAuditLogs(limit = 8) {
+export async function getRecentVehicleAuditLogs(
+  limit = 8
+): Promise<VehicleAuditLogRecord[]> {
   return getPrismaClient().vehicleAuditLog.findMany({
     include: vehicleAuditLogInclude,
     orderBy: {

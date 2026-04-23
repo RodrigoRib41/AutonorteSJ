@@ -25,7 +25,7 @@ export function About() {
   return (
     <section id="nosotros" className="relative overflow-hidden bg-white py-20 sm:py-24">
       <div className="absolute inset-x-0 top-0 h-2 bg-zinc-950" />
-      <div className="absolute -right-20 top-12 hidden h-56 w-40 skew-x-[-16deg] bg-[#f2c400] lg:block" />
+      <div className="absolute -right-20 top-12 hidden h-56 w-40 skew-x-[-16deg] bg-[var(--brand-primary)] lg:block" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
           <div className="max-w-2xl space-y-6">
@@ -51,10 +51,10 @@ export function About() {
               return (
                 <article
                   key={pillar.title}
-                  className="rounded-[1.5rem] border border-zinc-950/12 bg-[#fff8d6] p-6 shadow-[0_18px_44px_rgba(0,0,0,0.08)]"
+                  className="rounded-[1.5rem] border border-zinc-950/12 bg-[var(--brand-soft)] p-6 shadow-[0_18px_44px_rgba(0,0,0,0.08)]"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="rounded-2xl bg-zinc-950 p-3 text-[#f2c400]">
+                    <div className="rounded-2xl bg-zinc-950 p-3 text-[var(--brand-primary)]">
                       <Icon className="size-5" />
                     </div>
                     <div>

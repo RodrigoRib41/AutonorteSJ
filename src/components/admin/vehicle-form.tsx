@@ -180,7 +180,9 @@ export function VehicleForm({ mode, vehicle, featuredVehicles }: VehicleFormProp
       }
 
       if (mode === "create" && result.vehicle?.id) {
-        router.push(`/admin/vehiculos/${result.vehicle.id}/editar`);
+        router.push(
+          `/admin/vehiculos/${result.vehicle.id}/editar?created=1#imagenes`
+        );
         router.refresh();
         return;
       }
@@ -420,7 +422,8 @@ export function VehicleForm({ mode, vehicle, featuredVehicles }: VehicleFormProp
       </div>
 
       <div className="rounded-[1.5rem] border border-zinc-200 bg-zinc-50 px-5 py-4 text-sm leading-7 text-zinc-600">
-        Guarda la unidad y luego suma las fotos.
+        Guarda la unidad y despues suma las fotos. Al terminar, podes pasar
+        directo a cargar otro vehiculo.
       </div>
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -437,7 +440,7 @@ export function VehicleForm({ mode, vehicle, featuredVehicles }: VehicleFormProp
           {errorMessage ||
             successMessage ||
             (mode === "create"
-              ? "Despues de guardar podes cargar las fotos."
+              ? "Despues de guardar vas directo a la carga de fotos."
               : "Los cambios quedan disponibles en papelera durante 7 dias.")}
         </p>
 

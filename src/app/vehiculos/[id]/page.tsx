@@ -48,9 +48,9 @@ export default async function VehicleDetailPage({
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
-      <main className="bg-[#f5f1df]">
+      <main className="bg-[var(--brand-canvas)]">
         <section className="relative overflow-hidden border-b border-zinc-950/15">
-          <div className="absolute inset-x-0 top-0 h-[28rem] bg-[#f2c400]" />
+          <div className="absolute inset-x-0 top-0 h-[28rem] bg-[var(--brand-primary)]" />
           <div className="absolute inset-x-0 top-0 h-[28rem] opacity-20 [background-image:linear-gradient(90deg,rgba(0,0,0,.12)_1px,transparent_1px)] [background-size:18px_100%]" />
           <div className="absolute -right-20 top-32 hidden h-72 w-60 skew-x-[-16deg] bg-zinc-950 lg:block" />
           <div className="absolute right-44 top-32 hidden h-72 w-20 skew-x-[-16deg] bg-white/90 lg:block" />
@@ -75,7 +75,7 @@ export default async function VehicleDetailPage({
                 />
 
                 <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-[1.5rem] border border-zinc-950/10 bg-[#fff8d6] p-5">
+                  <div className="rounded-[1.5rem] border border-zinc-950/10 bg-[var(--brand-soft)] p-5">
                     <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-zinc-600 uppercase">
                       <CalendarDays className="size-4" />
                       Año
@@ -85,7 +85,7 @@ export default async function VehicleDetailPage({
                     </p>
                   </div>
 
-                  <div className="rounded-[1.5rem] border border-zinc-950/10 bg-[#fff8d6] p-5">
+                  <div className="rounded-[1.5rem] border border-zinc-950/10 bg-[var(--brand-soft)] p-5">
                     <div className="flex items-center gap-2 text-xs font-semibold tracking-[0.18em] text-zinc-600 uppercase">
                       <Gauge className="size-4" />
                       Kilometraje
@@ -103,7 +103,7 @@ export default async function VehicleDetailPage({
                     Ficha tecnica
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <div className="inline-flex rounded-full bg-zinc-950 px-4 py-2 text-xs font-semibold tracking-[0.18em] text-[#f2c400] uppercase">
+                    <div className="inline-flex rounded-full bg-zinc-950 px-4 py-2 text-xs font-semibold tracking-[0.18em] text-[var(--brand-primary)] uppercase">
                       {getVehicleConditionLabel(vehicle.condition)}
                     </div>
                     {hasPromotion ? (
@@ -141,7 +141,7 @@ export default async function VehicleDetailPage({
                   </p>
 
                   <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-[1.5rem] border border-zinc-950/10 bg-[#fff8d6] p-5">
+                    <div className="rounded-[1.5rem] border border-zinc-950/10 bg-[var(--brand-soft)] p-5">
                       <p className="text-xs font-semibold tracking-[0.18em] text-zinc-600 uppercase">
                         Tipo de unidad
                       </p>
@@ -150,7 +150,7 @@ export default async function VehicleDetailPage({
                       </p>
                     </div>
 
-                    <div className="rounded-[1.5rem] border border-zinc-950/10 bg-[#fff8d6] p-5">
+                    <div className="rounded-[1.5rem] border border-zinc-950/10 bg-[var(--brand-soft)] p-5">
                       <p className="text-xs font-semibold tracking-[0.18em] text-zinc-600 uppercase">
                         Marca
                       </p>
@@ -159,7 +159,7 @@ export default async function VehicleDetailPage({
                       </p>
                     </div>
 
-                    <div className="rounded-[1.5rem] border border-zinc-950/10 bg-[#fff8d6] p-5">
+                    <div className="rounded-[1.5rem] border border-zinc-950/10 bg-[var(--brand-soft)] p-5">
                       <p className="text-xs font-semibold tracking-[0.18em] text-zinc-600 uppercase">
                         Categoria
                       </p>
@@ -168,7 +168,7 @@ export default async function VehicleDetailPage({
                       </p>
                     </div>
 
-                    <div className="rounded-[1.5rem] border border-zinc-950/10 bg-[#fff8d6] p-5">
+                    <div className="rounded-[1.5rem] border border-zinc-950/10 bg-[var(--brand-soft)] p-5">
                       <p className="text-xs font-semibold tracking-[0.18em] text-zinc-600 uppercase">
                         Modelo
                       </p>
@@ -178,7 +178,7 @@ export default async function VehicleDetailPage({
                     </div>
 
                     {hasPromotion ? (
-                      <div className="rounded-[1.5rem] border border-zinc-950/15 bg-[#f2c400] p-5 sm:col-span-2">
+                      <div className="rounded-[1.5rem] border border-zinc-950/15 bg-[var(--brand-primary)] p-5 sm:col-span-2">
                         <p className="text-xs font-semibold tracking-[0.18em] text-zinc-800 uppercase">
                           Promocion
                         </p>
@@ -188,7 +188,7 @@ export default async function VehicleDetailPage({
                       </div>
                     ) : null}
 
-                    <div className="rounded-[1.5rem] border border-zinc-950/10 bg-[#fff8d6] p-5 sm:col-span-2">
+                    <div className="rounded-[1.5rem] border border-zinc-950/10 bg-[var(--brand-soft)] p-5 sm:col-span-2">
                       <p className="text-xs font-semibold tracking-[0.18em] text-zinc-600 uppercase">
                         Moneda de publicacion
                       </p>
@@ -218,8 +218,8 @@ export default async function VehicleDetailPage({
                   </div>
 
                   <div className="mt-8 grid gap-4 md:grid-cols-3">
-                    <article className="rounded-[1.5rem] border border-zinc-950/10 bg-[#fff8d6] p-5">
-                      <div className="w-fit rounded-2xl bg-[#f2c400] p-3 text-zinc-950 shadow-sm">
+                    <article className="rounded-[1.5rem] border border-zinc-950/10 bg-[var(--brand-soft)] p-5">
+                      <div className="w-fit rounded-2xl bg-[var(--brand-primary)] p-3 text-zinc-950 shadow-sm">
                         <Users className="size-5" />
                       </div>
                       <h4 className="mt-4 text-lg font-semibold text-zinc-950">
@@ -230,8 +230,8 @@ export default async function VehicleDetailPage({
                       </p>
                     </article>
 
-                    <article className="rounded-[1.5rem] border border-zinc-950/10 bg-[#fff8d6] p-5">
-                      <div className="w-fit rounded-2xl bg-[#f2c400] p-3 text-zinc-950 shadow-sm">
+                    <article className="rounded-[1.5rem] border border-zinc-950/10 bg-[var(--brand-soft)] p-5">
+                      <div className="w-fit rounded-2xl bg-[var(--brand-primary)] p-3 text-zinc-950 shadow-sm">
                         <TimerReset className="size-5" />
                       </div>
                       <h4 className="mt-4 text-lg font-semibold text-zinc-950">
@@ -242,8 +242,8 @@ export default async function VehicleDetailPage({
                       </p>
                     </article>
 
-                    <article className="rounded-[1.5rem] border border-zinc-950/10 bg-[#fff8d6] p-5">
-                      <div className="w-fit rounded-2xl bg-[#f2c400] p-3 text-zinc-950 shadow-sm">
+                    <article className="rounded-[1.5rem] border border-zinc-950/10 bg-[var(--brand-soft)] p-5">
+                      <div className="w-fit rounded-2xl bg-[var(--brand-primary)] p-3 text-zinc-950 shadow-sm">
                         <ShieldCheck className="size-5" />
                       </div>
                       <h4 className="mt-4 text-lg font-semibold text-zinc-950">

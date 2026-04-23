@@ -8,8 +8,8 @@ export async function FeaturedVehicles() {
   const featuredVehicles = await getPublicFeaturedVehicles(3);
 
   return (
-    <section id="vehiculos" className="relative overflow-hidden bg-[#f5f1df] py-16 sm:py-20 lg:py-24">
-      <div className="absolute inset-x-0 top-0 h-2 bg-[#f2c400]" />
+    <section id="vehiculos" className="relative overflow-hidden bg-[var(--brand-canvas)] py-16 sm:py-20 lg:py-24">
+      <div className="absolute inset-x-0 top-0 h-2 bg-[var(--brand-primary)]" />
       <div className="absolute -left-16 top-16 hidden h-40 w-28 skew-x-[-16deg] bg-zinc-950/90 lg:block" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -53,7 +53,7 @@ export async function FeaturedVehicles() {
             asChild
             size="lg"
             variant="outline"
-            className="h-12 w-full rounded-full border-zinc-950 bg-zinc-950 px-6 text-[#f2c400] hover:bg-zinc-900 sm:w-auto"
+            className="h-12 w-full rounded-full border-zinc-950 bg-zinc-950 px-6 text-[var(--brand-primary)] hover:bg-zinc-900 sm:w-auto"
           >
             <Link href="/vehiculos">Ver stock completo</Link>
           </Button>

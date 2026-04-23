@@ -44,8 +44,8 @@ export default function NosotrosPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
-      <main className="bg-[#f5f1df]">
-        <section className="relative overflow-hidden border-b border-zinc-950/15 bg-[#f2c400]">
+      <main className="bg-[var(--brand-canvas)]">
+        <section className="relative overflow-hidden border-b border-zinc-950/15 bg-[var(--brand-primary)]">
           <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(90deg,rgba(0,0,0,.12)_1px,transparent_1px)] [background-size:18px_100%]" />
           <div className="absolute -right-20 bottom-0 hidden h-64 w-56 skew-x-[-16deg] bg-zinc-950 lg:block" />
           <div className="absolute right-44 bottom-0 hidden h-64 w-20 skew-x-[-16deg] bg-white/90 lg:block" />
@@ -66,7 +66,7 @@ export default function NosotrosPage() {
                 <Button
                   asChild
                   size="lg"
-                  className="h-12 rounded-full bg-zinc-950 px-6 text-[#f2c400] hover:bg-zinc-900"
+                  className="h-12 rounded-full bg-zinc-950 px-6 text-[var(--brand-primary)] hover:bg-zinc-900"
                 >
                   <Link href="/vehiculos">
                     Ver vehiculos
@@ -92,7 +92,7 @@ export default function NosotrosPage() {
                 {["Trayectoria", "Seleccion", "Respaldo"].map((item) => (
                   <div
                     key={item}
-                    className="rounded-[1rem] border border-zinc-950/12 bg-[#fff8d6] p-4"
+                    className="rounded-[1rem] border border-zinc-950/12 bg-[var(--brand-soft)] p-4"
                   >
                     <BadgeCheck className="size-5 text-zinc-950" />
                     <p className="mt-3 text-sm font-semibold text-zinc-950">
@@ -125,7 +125,7 @@ export default function NosotrosPage() {
                     key={pillar.title}
                     className="rounded-[1.5rem] border border-zinc-950/12 bg-white p-6 shadow-[0_18px_48px_rgba(0,0,0,0.1)]"
                   >
-                    <div className="rounded-2xl bg-[#f2c400] p-3 text-zinc-950">
+                    <div className="rounded-2xl bg-[var(--brand-primary)] p-3 text-zinc-950">
                       <Icon className="size-5" />
                     </div>
                     <h3 className="mt-6 text-xl font-semibold text-zinc-950">
@@ -142,11 +142,11 @@ export default function NosotrosPage() {
         </section>
 
         <section className="relative overflow-hidden bg-zinc-950 py-16 text-white sm:py-20">
-          <div className="absolute inset-y-0 right-0 hidden w-1/3 skew-x-[-16deg] bg-[#f2c400] lg:block" />
+          <div className="absolute inset-y-0 right-0 hidden w-1/3 skew-x-[-16deg] bg-[var(--brand-primary)] lg:block" />
           <div className="absolute inset-y-0 right-[28%] hidden w-24 skew-x-[-16deg] bg-white/90 lg:block" />
           <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:px-8">
             <div>
-              <p className="text-sm font-semibold tracking-[0.28em] text-[#f2c400] uppercase">
+              <p className="text-sm font-semibold tracking-[0.28em] text-[var(--brand-primary)] uppercase">
                 Como acompanamos
               </p>
               <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -161,7 +161,7 @@ export default function NosotrosPage() {
                   className="rounded-[1.25rem] border border-white/10 bg-white/8 p-5"
                 >
                   <div className="flex items-start gap-4">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2c400] text-sm font-semibold text-zinc-950">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[var(--brand-primary)] text-sm font-semibold text-zinc-950">
                       {index + 1}
                     </span>
                     <p className="text-base leading-7 text-zinc-200">{step}</p>

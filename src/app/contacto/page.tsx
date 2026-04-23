@@ -52,8 +52,8 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
-      <main className="bg-[#f5f1df]">
-        <section className="relative overflow-hidden border-b border-zinc-950/15 bg-[#f2c400]">
+      <main className="bg-[var(--brand-canvas)]">
+        <section className="relative overflow-hidden border-b border-zinc-950/15 bg-[var(--brand-primary)]">
           <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(90deg,rgba(0,0,0,.12)_1px,transparent_1px)] [background-size:18px_100%]" />
           <div className="absolute -right-20 bottom-0 hidden h-56 w-56 skew-x-[-16deg] bg-zinc-950 lg:block" />
           <div className="absolute right-44 bottom-0 hidden h-56 w-20 skew-x-[-16deg] bg-white/90 lg:block" />
@@ -88,10 +88,10 @@ export default function ContactPage() {
                     return (
                       <article
                         key={item.title}
-                        className="rounded-[1.25rem] border border-zinc-950/10 bg-[#fff8d6] p-5"
+                        className="rounded-[1.25rem] border border-zinc-950/10 bg-[var(--brand-soft)] p-5"
                       >
                         <div className="flex items-start gap-4">
-                          <div className="rounded-2xl bg-[#f2c400] p-3 text-zinc-950 shadow-sm">
+                          <div className="rounded-2xl bg-[var(--brand-primary)] p-3 text-zinc-950 shadow-sm">
                             <Icon className="size-5" />
                           </div>
                           <div>
@@ -110,7 +110,7 @@ export default function ContactPage() {
               </div>
 
               <div className="rounded-[1.5rem] bg-zinc-950 p-8 text-white shadow-[0_28px_70px_rgba(0,0,0,0.22)] sm:p-10">
-                <p className="text-sm font-semibold tracking-[0.28em] text-[#f2c400] uppercase">
+                <p className="text-sm font-semibold tracking-[0.28em] text-[var(--brand-primary)] uppercase">
                   Atencion
                 </p>
 
@@ -124,7 +124,7 @@ export default function ContactPage() {
                         className="rounded-[1.25rem] border border-white/10 bg-white/8 p-5"
                       >
                         <div className="flex items-start gap-4">
-                          <div className="rounded-2xl bg-[#f2c400] p-3 text-zinc-950">
+                          <div className="rounded-2xl bg-[var(--brand-primary)] p-3 text-zinc-950">
                             <Icon className="size-5" />
                           </div>
                           <div>

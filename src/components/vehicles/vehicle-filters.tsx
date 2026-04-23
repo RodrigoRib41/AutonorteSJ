@@ -20,7 +20,7 @@ type VehicleFiltersProps = {
 };
 
 const fieldClassName =
-  "h-12 w-full rounded-xl border border-zinc-950/15 bg-white px-4 text-base text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-[#f2c400] focus:ring-4 focus:ring-yellow-300/30 sm:rounded-2xl sm:text-sm";
+  "h-12 w-full rounded-xl border border-zinc-950/15 bg-white px-4 text-base text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-[var(--brand-primary)] focus:ring-4 focus:ring-[var(--brand-ring-soft)] sm:rounded-2xl sm:text-sm";
 
 export function VehicleFilters({
   actionPath,
@@ -40,7 +40,7 @@ export function VehicleFilters({
 
   return (
     <details className="group">
-      <summary className="flex w-full list-none cursor-pointer items-center justify-center gap-3 rounded-full border border-zinc-950 bg-zinc-950 px-4 py-3 text-sm font-medium text-[#f2c400] shadow-sm transition hover:bg-zinc-900 sm:inline-flex sm:w-auto [&::-webkit-details-marker]:hidden">
+      <summary className="flex w-full list-none cursor-pointer items-center justify-center gap-3 rounded-full border border-zinc-950 bg-zinc-950 px-4 py-3 text-sm font-medium text-[var(--brand-primary)] shadow-sm transition hover:bg-zinc-900 sm:inline-flex sm:w-auto [&::-webkit-details-marker]:hidden">
         <span className="inline-flex items-center gap-2">
           <SlidersHorizontal className="size-4" />
           {hasFilters
@@ -64,7 +64,7 @@ export function VehicleFilters({
                 : `${totalCount} unidades disponibles para consultar.`}
             </p>
           </div>
-          <div className="inline-flex rounded-full border border-zinc-950/15 bg-[#fff8d6] px-4 py-2 text-sm font-medium text-zinc-800">
+          <div className="inline-flex rounded-full border border-zinc-950/15 bg-[var(--brand-soft)] px-4 py-2 text-sm font-medium text-zinc-800">
             {visibleCount} {visibleCount === 1 ? "resultado" : "resultados"}
           </div>
         </div>
@@ -268,7 +268,7 @@ export function VehicleFilters({
             <Button
               type="submit"
               size="lg"
-              className="h-12 w-full rounded-full bg-[#f2c400] px-6 text-zinc-950 hover:bg-yellow-300 sm:w-auto"
+              className="h-12 w-full rounded-full bg-[var(--brand-primary)] px-6 text-zinc-950 hover:bg-[var(--brand-primary-hover)] sm:w-auto"
             >
               Aplicar filtros
             </Button>
@@ -276,7 +276,7 @@ export function VehicleFilters({
               asChild
               size="lg"
               variant="outline"
-              className="h-12 w-full rounded-full border-zinc-950 bg-white px-6 text-zinc-950 hover:bg-[#fff8d6] sm:w-auto"
+              className="h-12 w-full rounded-full border-zinc-950 bg-white px-6 text-zinc-950 hover:bg-[var(--brand-soft)] sm:w-auto"
             >
               <Link href={actionPath}>Limpiar filtros</Link>
             </Button>

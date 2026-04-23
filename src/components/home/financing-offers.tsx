@@ -33,12 +33,12 @@ const offers = [
 export function FinancingOffers() {
   return (
     <section className="relative overflow-hidden bg-zinc-950 py-16 text-white sm:py-20 lg:py-24">
-      <div className="absolute inset-y-0 right-0 hidden w-1/3 skew-x-[-16deg] bg-[#f2c400] lg:block" />
+      <div className="absolute inset-y-0 right-0 hidden w-1/3 skew-x-[-16deg] bg-[var(--brand-primary)] lg:block" />
       <div className="absolute inset-y-0 right-[28%] hidden w-24 skew-x-[-16deg] bg-white/90 lg:block" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
           <div className="relative max-w-2xl">
-            <p className="text-xs font-semibold tracking-[0.24em] text-[#f2c400] uppercase sm:text-sm sm:tracking-[0.28em]">
+            <p className="text-xs font-semibold tracking-[0.24em] text-[var(--brand-primary)] uppercase sm:text-sm sm:tracking-[0.28em]">
               Financiacion
             </p>
             <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl lg:text-4xl">
@@ -52,7 +52,7 @@ export function FinancingOffers() {
               <Button
                 asChild
                 size="lg"
-                className="h-12 w-full rounded-full bg-[#f2c400] px-6 text-zinc-950 shadow-[0_16px_34px_rgba(242,196,0,0.2)] hover:bg-yellow-300 sm:w-auto"
+                className="h-12 w-full rounded-full bg-[var(--brand-primary)] px-6 text-zinc-950 shadow-[0_16px_34px_rgba(221,210,51,0.2)] hover:bg-[var(--brand-primary-hover)] sm:w-auto"
               >
                 <Link href="/contacto">
                   Consultar financiacion
@@ -80,7 +80,7 @@ export function FinancingOffers() {
                   className="rounded-[1.5rem] border border-white/12 bg-white/92 p-5 text-zinc-950 shadow-[0_20px_50px_rgba(0,0,0,0.16)] sm:p-6"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="rounded-[1.15rem] bg-[#f2c400] p-3 text-zinc-950">
+                    <div className="rounded-[1.15rem] bg-[var(--brand-primary)] p-3 text-zinc-950">
                       <Icon className="size-5" />
                     </div>
                     <div className="min-w-0">
@@ -96,9 +96,9 @@ export function FinancingOffers() {
               );
             })}
 
-            <div className="rounded-[1.5rem] border border-yellow-300/40 bg-[#f2c400] p-5 text-zinc-950 shadow-[0_20px_50px_rgba(0,0,0,0.16)] sm:p-6">
+            <div className="rounded-[1.5rem] border border-[var(--brand-border-strong)] bg-[var(--brand-primary)] p-5 text-zinc-950 shadow-[0_20px_50px_rgba(0,0,0,0.16)] sm:p-6">
               <div className="flex items-start gap-4">
-                <div className="rounded-[1.15rem] bg-zinc-950 p-3 text-[#f2c400] shadow-sm">
+                <div className="rounded-[1.15rem] bg-zinc-950 p-3 text-[var(--brand-primary)] shadow-sm">
                   <ClipboardCheck className="size-5" />
                 </div>
                 <p className="min-w-0 text-sm leading-7 text-zinc-950 sm:text-base">

@@ -49,7 +49,7 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
     <div className="min-h-screen bg-background text-foreground">
       <Header />
       <main>
-        <section className="relative overflow-hidden border-b border-zinc-950/15 bg-[#f2c400]">
+        <section className="relative overflow-hidden border-b border-zinc-950/15 bg-[var(--brand-primary)]">
           <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(90deg,rgba(0,0,0,.12)_1px,transparent_1px)] [background-size:18px_100%]" />
           <div className="absolute -right-20 bottom-0 hidden h-56 w-56 skew-x-[-16deg] bg-zinc-950 lg:block" />
           <div className="absolute right-44 bottom-0 hidden h-56 w-20 skew-x-[-16deg] bg-white/90 lg:block" />
@@ -82,7 +82,7 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
                 variant={filters.condition === "ZERO_KM" ? "default" : "outline"}
                 className={
                   filters.condition === "ZERO_KM"
-                    ? "h-12 w-full rounded-full bg-zinc-950 px-6 text-[#f2c400] hover:bg-zinc-900 sm:w-auto"
+                    ? "h-12 w-full rounded-full bg-zinc-950 px-6 text-[var(--brand-primary)] hover:bg-zinc-900 sm:w-auto"
                     : "h-12 w-full rounded-full border-zinc-950/25 bg-white/88 px-6 text-zinc-950 hover:bg-white sm:w-auto"
                 }
               >
@@ -95,7 +95,7 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
                 variant={filters.condition === "USED" ? "default" : "outline"}
                 className={
                   filters.condition === "USED"
-                    ? "h-12 w-full rounded-full bg-zinc-950 px-6 text-[#f2c400] hover:bg-zinc-900 sm:w-auto"
+                    ? "h-12 w-full rounded-full bg-zinc-950 px-6 text-[var(--brand-primary)] hover:bg-zinc-900 sm:w-auto"
                     : "h-12 w-full rounded-full border-zinc-950/25 bg-white/88 px-6 text-zinc-950 hover:bg-white sm:w-auto"
                 }
               >
@@ -108,7 +108,7 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
                 variant={filters.hasPromotion === "true" ? "default" : "outline"}
                 className={
                   filters.hasPromotion === "true"
-                    ? "h-12 w-full rounded-full bg-zinc-950 px-6 text-[#f2c400] hover:bg-zinc-900 sm:w-auto"
+                    ? "h-12 w-full rounded-full bg-zinc-950 px-6 text-[var(--brand-primary)] hover:bg-zinc-900 sm:w-auto"
                     : "h-12 w-full rounded-full border-zinc-950/25 bg-white/88 px-6 text-zinc-950 hover:bg-white sm:w-auto"
                 }
               >
@@ -131,7 +131,7 @@ export default async function VehiclesPage({ searchParams }: VehiclesPageProps) 
           </div>
         </section>
 
-        <section className="bg-[#f5f1df] py-10 sm:py-20">
+        <section className="bg-[var(--brand-canvas)] py-10 sm:py-20">
           <div className="mx-auto max-w-7xl space-y-8 px-4 sm:space-y-10 sm:px-6 lg:px-8">
             {totalCount > 0 ? (
               <VehicleFilters

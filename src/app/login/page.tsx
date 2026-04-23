@@ -34,9 +34,9 @@ export default async function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f5f1df] px-4 py-10 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[var(--brand-canvas)] px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-stretch">
-        <section className="relative overflow-hidden rounded-[2rem] border border-zinc-950/15 bg-[#f2c400] p-8 text-zinc-950 shadow-[0_32px_80px_rgba(0,0,0,0.18)] sm:p-10 lg:p-12">
+        <section className="relative overflow-hidden rounded-[2rem] border border-zinc-950/15 bg-[var(--brand-primary)] p-8 text-zinc-950 shadow-[0_32px_80px_rgba(0,0,0,0.18)] sm:p-10 lg:p-12">
           <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(90deg,rgba(0,0,0,.12)_1px,transparent_1px)] [background-size:18px_100%]" />
           <div className="absolute -right-16 bottom-0 h-64 w-44 skew-x-[-16deg] bg-zinc-950" />
           <div className="absolute right-32 bottom-0 h-64 w-16 skew-x-[-16deg] bg-white/90" />
@@ -68,7 +68,7 @@ export default async function LoginPage() {
                   key={point.title}
                   className="rounded-[1.5rem] border border-zinc-950/10 bg-white/86 p-5 shadow-sm backdrop-blur-sm"
                 >
-                  <div className="w-fit rounded-2xl bg-zinc-950 p-3 text-[#f2c400]">
+                  <div className="w-fit rounded-2xl bg-zinc-950 p-3 text-[var(--brand-primary)]">
                     <Icon className="size-5" />
                   </div>
                   <h2 className="mt-4 text-lg font-semibold">{point.title}</h2>
@@ -98,7 +98,7 @@ export default async function LoginPage() {
             <LoginForm />
           </div>
 
-          <div className="mt-8 rounded-[1.5rem] border border-zinc-950/10 bg-[#fff8d6] p-5">
+          <div className="mt-8 rounded-[1.5rem] border border-zinc-950/10 bg-[var(--brand-soft)] p-5">
             <p className="text-xs font-semibold tracking-[0.18em] text-zinc-600 uppercase">
               Acceso institucional
             </p>

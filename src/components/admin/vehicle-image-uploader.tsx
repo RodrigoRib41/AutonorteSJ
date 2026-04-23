@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
   GripVertical,
@@ -28,6 +29,7 @@ type VehicleImageUploaderProps = {
   vehicleId: string;
   vehicleName: string;
   initialImages: VehicleImageApiRecord[];
+  showCreateAnotherAction?: boolean;
 };
 
 type PendingPreview = {
@@ -43,6 +45,7 @@ export function VehicleImageUploader({
   vehicleId,
   vehicleName,
   initialImages,
+  showCreateAnotherAction = false,
 }: VehicleImageUploaderProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const dragCounterRef = useRef(0);
@@ -940,6 +943,30 @@ export function VehicleImageUploader({
             ? "Guardando el nuevo orden visual de las imagenes..."
             : `Fotos cargadas: ${images.length}. Pendientes: ${selectedFiles.length}. Espacio disponible: ${remainingPendingSlots}.`)}
       </p>
+
+      {showCreateAnotherAction && images.length > 0 ? (
+        <div className="rounded-[1.75rem] border border-zinc-200 bg-zinc-50 p-5 sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="max-w-2xl">
+              <p className="text-sm font-semibold tracking-[0.18em] text-zinc-700 uppercase">
+                Siguiente paso
+              </p>
+              <p className="mt-2 text-sm leading-6 text-zinc-600">
+                Si ya terminaste con las fotos de esta unidad, podes arrancar
+                la siguiente sin volver al listado.
+              </p>
+            </div>
+
+            <Button
+              asChild
+              type="button"
+              className="h-12 rounded-full bg-zinc-950 px-6 text-white hover:bg-zinc-800"
+            >
+              <Link href="/admin/vehiculos/nuevo">Crear nuevo vehiculo</Link>
+            </Button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

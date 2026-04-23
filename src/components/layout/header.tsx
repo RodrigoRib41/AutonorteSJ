@@ -11,15 +11,15 @@ const navigation = [
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 overflow-hidden border-b border-yellow-400/20 bg-zinc-950/96 text-white shadow-[0_14px_40px_rgba(0,0,0,0.22)] backdrop-blur-xl">
-      <div className="h-1 bg-[#f2c400]" />
+    <header className="sticky top-0 z-50 overflow-hidden border-b border-[var(--brand-border-soft)] bg-zinc-950/96 text-white shadow-[0_14px_40px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+      <div className="h-1 bg-[var(--brand-primary)]" />
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
         <Link href="/" className="min-w-0 flex-1 md:flex-none">
-          <div className="flex flex-col border-l-4 border-[#f2c400] pl-3">
+          <div className="flex flex-col border-l-4 border-[var(--brand-primary)] pl-3">
             <span className="truncate text-base font-semibold tracking-tight text-white sm:text-xl">
               TestAutomotores
             </span>
-            <span className="hidden text-[11px] font-medium tracking-[0.28em] text-yellow-300 uppercase sm:block">
+            <span className="hidden text-[11px] font-medium tracking-[0.28em] text-[var(--brand-primary)] uppercase sm:block">
               Concesionaria multimarcas
             </span>
           </div>
@@ -30,7 +30,7 @@ export function Header() {
             <Link
               key={item.href}
               href={item.href}
-              className="transition-colors hover:text-[#f2c400]"
+              className="transition-colors hover:text-[var(--brand-primary)]"
             >
               {item.label}
             </Link>
@@ -39,7 +39,7 @@ export function Header() {
 
         <Button
           asChild
-          className="hidden h-10 rounded-full border border-yellow-300/30 bg-[#f2c400] px-3 text-xs font-semibold text-zinc-950 shadow-[0_10px_24px_rgba(242,196,0,0.22)] hover:bg-yellow-300 sm:inline-flex sm:h-11 sm:px-5 sm:text-sm"
+          className="hidden h-10 rounded-full border border-[var(--brand-border-strong)] bg-[var(--brand-primary)] px-3 text-xs font-semibold text-zinc-950 shadow-[0_10px_24px_rgba(221,210,51,0.22)] hover:bg-[var(--brand-primary-hover)] sm:inline-flex sm:h-11 sm:px-5 sm:text-sm"
         >
           <Link href="/contacto">Consultar</Link>
         </Button>
@@ -50,7 +50,7 @@ export function Header() {
           <Link
             key={item.href}
             href={item.href}
-            className="shrink-0 rounded-full border border-white/10 bg-white/8 px-4 py-2 text-center transition-colors hover:border-yellow-300/50 hover:text-[#f2c400]"
+            className="shrink-0 rounded-full border border-white/10 bg-white/8 px-4 py-2 text-center transition-colors hover:border-[var(--brand-border-strong)] hover:text-[var(--brand-primary)]"
           >
             {item.label}
           </Link>

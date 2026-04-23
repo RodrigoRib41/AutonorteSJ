@@ -24,7 +24,7 @@ const contactItems = [
 
 export function Contact() {
   return (
-    <section id="contacto" className="bg-[#f2c400] py-20 sm:py-24">
+    <section id="contacto" className="bg-[var(--brand-primary)] py-20 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-stretch">
           <div className="rounded-[2rem] border border-zinc-950/15 bg-white/92 p-8 shadow-[0_24px_60px_rgba(0,0,0,0.14)] sm:p-10">
@@ -46,10 +46,10 @@ export function Contact() {
                 return (
                   <article
                     key={item.title}
-                    className="rounded-[1.5rem] border border-zinc-950/10 bg-[#fff8d6] p-5"
+                    className="rounded-[1.5rem] border border-zinc-950/10 bg-[var(--brand-soft)] p-5"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="rounded-2xl bg-[#f2c400] p-3 text-zinc-950 shadow-sm">
+                      <div className="rounded-2xl bg-[var(--brand-primary)] p-3 text-zinc-950 shadow-sm">
                         <Icon className="size-5" />
                       </div>
                       <div>
@@ -68,9 +68,9 @@ export function Contact() {
           </div>
 
           <div className="relative overflow-hidden rounded-[2rem] bg-zinc-950 p-8 text-white shadow-[0_28px_70px_rgba(0,0,0,0.22)] sm:p-10">
-            <div className="absolute -right-16 bottom-0 h-44 w-32 skew-x-[-16deg] bg-[#f2c400]" />
+            <div className="absolute -right-16 bottom-0 h-44 w-32 skew-x-[-16deg] bg-[var(--brand-primary)]" />
             <div className="relative">
-              <p className="text-sm font-semibold tracking-[0.28em] text-[#f2c400] uppercase">
+              <p className="text-sm font-semibold tracking-[0.28em] text-[var(--brand-primary)] uppercase">
                 Asesoramiento
               </p>
               <h3 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
@@ -84,7 +84,7 @@ export function Contact() {
                 <Button
                   asChild
                   size="lg"
-                  className="h-12 rounded-full bg-[#f2c400] px-6 text-zinc-950 hover:bg-yellow-300"
+                  className="h-12 rounded-full bg-[var(--brand-primary)] px-6 text-zinc-950 hover:bg-[var(--brand-primary-hover)]"
                 >
                   <Link href="/contacto">Ir a contacto</Link>
                 </Button>

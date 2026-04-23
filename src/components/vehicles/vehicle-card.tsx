@@ -31,7 +31,7 @@ export function VehicleCard({
 
   return (
     <article className="group overflow-hidden rounded-[1rem] border border-zinc-950/15 bg-white shadow-[0_10px_28px_rgba(0,0,0,0.1)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_58px_rgba(0,0,0,0.18)] sm:rounded-[1.25rem] sm:shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
-      <div className="relative border-b-4 border-[#f2c400]">
+      <div className="relative border-b-4 border-[var(--brand-primary)]">
         {primaryImage ? (
           <div className="relative aspect-[4/3] overflow-hidden bg-zinc-100 sm:aspect-[5/4]">
             <CloudinaryVehicleImage
@@ -52,7 +52,7 @@ export function VehicleCard({
             </div>
           </div>
         ) : (
-          <div className="flex aspect-[4/3] items-end bg-[linear-gradient(135deg,#f2c400_0%,#fff1a6_58%,#2b292d_58%,#2b292d_100%)] p-3 sm:aspect-[5/4] sm:p-5">
+          <div className="flex aspect-[4/3] items-end bg-[linear-gradient(135deg,var(--brand-primary)_0%,var(--brand-soft)_58%,#2b292d_58%,#2b292d_100%)] p-3 sm:aspect-[5/4] sm:p-5">
             <div className="rounded-[1.25rem] border border-white/70 bg-white/80 p-4 shadow-sm backdrop-blur">
               <p className="text-[11px] font-semibold tracking-[0.2em] text-zinc-500 uppercase">
                 Sin imagenes
@@ -69,7 +69,7 @@ export function VehicleCard({
 
         <div className="absolute top-3 right-3 left-3 flex min-w-0 items-start justify-between gap-2 sm:top-4 sm:right-4 sm:left-4 sm:gap-3">
           <div className="flex min-w-0 flex-wrap gap-2">
-            <div className="rounded-full bg-[#f2c400]/95 px-2.5 py-1 text-[10px] font-semibold tracking-[0.14em] text-zinc-950 uppercase shadow-sm backdrop-blur sm:px-3 sm:text-[11px]">
+            <div className="rounded-full bg-[rgba(221,210,51,0.95)] px-2.5 py-1 text-[10px] font-semibold tracking-[0.14em] text-zinc-950 uppercase shadow-sm backdrop-blur sm:px-3 sm:text-[11px]">
               {getVehicleCategoryLabel(vehicle.category)}
             </div>
             <div className="rounded-full bg-zinc-950/92 px-2.5 py-1 text-[10px] font-semibold tracking-[0.14em] text-white uppercase shadow-sm backdrop-blur sm:px-3 sm:text-[11px]">
@@ -95,7 +95,7 @@ export function VehicleCard({
       </div>
 
       <div className="space-y-3 bg-white p-3 sm:p-4">
-        <div className="rounded-[0.9rem] border border-zinc-950/10 bg-[#fff8d6] p-3 sm:rounded-[1rem]">
+        <div className="rounded-[0.9rem] border border-zinc-950/10 bg-[var(--brand-soft)] p-3 sm:rounded-[1rem]">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 text-[11px] font-semibold tracking-[0.14em] text-zinc-500 uppercase">
               <Tag className="size-4" />
@@ -142,7 +142,7 @@ export function VehicleCard({
           asChild
           size="lg"
           variant="outline"
-          className="h-11 w-full rounded-full border-zinc-950 bg-zinc-950 text-[#f2c400] hover:bg-zinc-900"
+          className="h-11 w-full rounded-full border-zinc-950 bg-zinc-950 text-[var(--brand-primary)] hover:bg-zinc-900"
         >
           <Link href={`/vehiculos/${vehicle.id}`} prefetch={false}>
             Ver detalle

@@ -13,16 +13,16 @@ export default async function AdminLayout({
   const admin = await requireAdminPageAccess();
 
   return (
-    <div className="min-h-screen bg-[#f5f1df] text-zinc-950">
+    <div className="min-h-screen bg-[var(--brand-canvas)] text-zinc-950">
       <header className="border-b border-zinc-950 bg-zinc-950 text-white">
-        <div className="h-2 bg-[#f2c400]" />
+        <div className="h-2 bg-[var(--brand-primary)]" />
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-5 sm:px-6 lg:px-8">
           <div className="flex items-center gap-4">
-            <div className="rounded-2xl bg-[#f2c400] p-3 text-zinc-950 shadow-sm">
+            <div className="rounded-2xl bg-[var(--brand-primary)] p-3 text-zinc-950 shadow-sm">
               <LayoutGrid className="size-5" />
             </div>
             <div>
-              <p className="text-xs font-semibold tracking-[0.22em] text-[#f2c400] uppercase">
+              <p className="text-xs font-semibold tracking-[0.22em] text-[var(--brand-primary)] uppercase">
                 TestAutomotores
               </p>
               <h1 className="text-lg font-semibold tracking-tight text-white">
@@ -65,7 +65,7 @@ export default async function AdminLayout({
               <span className="font-medium text-white">{admin.name}</span>
               <span className="text-zinc-500">|</span>
               <span>{admin.username}</span>
-              <span className="rounded-full bg-[#f2c400] px-3 py-1 text-[11px] font-semibold tracking-[0.18em] text-zinc-950 uppercase">
+              <span className="rounded-full bg-[var(--brand-primary)] px-3 py-1 text-[11px] font-semibold tracking-[0.18em] text-zinc-950 uppercase">
                 {getAdminRoleLabel(admin.role)}
               </span>
             </div>
@@ -81,10 +81,10 @@ export default async function AdminLayout({
       <footer className="border-t border-zinc-950 bg-zinc-950">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-5 text-sm text-zinc-300 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="size-4 text-[#f2c400]" />
+            <ShieldCheck className="size-4 text-[var(--brand-primary)]" />
             Acceso protegido para el equipo autorizado.
           </div>
-          <Link href="/" className="transition-colors hover:text-[#f2c400]">
+          <Link href="/" className="transition-colors hover:text-[var(--brand-primary)]">
             Volver al sitio
           </Link>
         </div>

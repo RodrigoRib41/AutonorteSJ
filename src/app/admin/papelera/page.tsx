@@ -219,7 +219,7 @@ export default async function AdminTrashPage() {
                         </div>
                       </div>
                     ) : (
-                      <div className="mt-5 rounded-[1.25rem] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                      <div className="mt-5 rounded-[1.25rem] border border-[var(--brand-border-strong)] bg-[var(--brand-soft)] p-4 text-sm text-zinc-800">
                         No pudimos leer el detalle guardado de este movimiento.
                       </div>
                     )}

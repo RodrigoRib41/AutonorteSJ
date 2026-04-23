@@ -10,14 +10,20 @@ import { serializeVehicleImage } from "@/lib/vehicle-records";
 
 type EditVehiclePageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ created?: string | string[] | undefined }>;
 };
 
 export default async function EditVehiclePage({
   params,
+  searchParams,
 }: EditVehiclePageProps) {
   await requireAdminPageAccess(vehicleManagerRoles);
 
   const { id } = await params;
+  const createdParam = (await searchParams).created;
+  const wasJustCreated = Array.isArray(createdParam)
+    ? createdParam.includes("1")
+    : createdParam === "1";
   const vehicle = await getVehicleById(id);
 
   if (!vehicle) {
@@ -55,6 +61,12 @@ export default async function EditVehiclePage({
         <p className="mt-4 max-w-3xl text-base leading-8 text-zinc-600 sm:text-lg">
           Edita los datos, fotos y precio de la unidad.
         </p>
+        {wasJustCreated ? (
+          <div className="mt-6 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm leading-7 text-emerald-900">
+            La unidad ya se creo correctamente. Ahora podes cargar las fotos y,
+            cuando termines, pasar directo a la siguiente.
+          </div>
+        ) : null}
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {auditItems.map((item) => (
@@ -81,12 +93,16 @@ export default async function EditVehiclePage({
         />
       </section>
 
-      <section className="rounded-[2rem] border border-zinc-200 bg-white p-8 shadow-[0_24px_60px_rgba(24,24,27,0.06)] sm:p-10">
+      <section
+        id="imagenes"
+        className="rounded-[2rem] border border-zinc-200 bg-white p-8 shadow-[0_24px_60px_rgba(24,24,27,0.06)] sm:p-10"
+      >
         <VehicleImageUploader
           key={`${vehicle.id}-${vehicle.updatedAt.toISOString()}`}
           vehicleId={vehicle.id}
           vehicleName={`${vehicle.marca} ${vehicle.modelo}`}
           initialImages={vehicle.images.map(serializeVehicleImage)}
+          showCreateAnotherAction={wasJustCreated}
         />
       </section>
     </div>

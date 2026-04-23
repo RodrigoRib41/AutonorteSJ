@@ -19,10 +19,10 @@ const initialValues: ContactInquiryPayload = {
 };
 
 const inputClassName =
-  "h-12 w-full rounded-2xl border border-zinc-950/15 bg-white px-4 text-sm text-zinc-950 outline-none transition focus:border-[#f2c400] focus:ring-4 focus:ring-yellow-300/30";
+  "h-12 w-full rounded-2xl border border-zinc-950/15 bg-white px-4 text-sm text-zinc-950 outline-none transition focus:border-[var(--brand-primary)] focus:ring-4 focus:ring-[var(--brand-ring-soft)]";
 
 const textareaClassName =
-  "min-h-32 w-full rounded-2xl border border-zinc-950/15 bg-white px-4 py-3 text-sm text-zinc-950 outline-none transition focus:border-[#f2c400] focus:ring-4 focus:ring-yellow-300/30";
+  "min-h-32 w-full rounded-2xl border border-zinc-950/15 bg-white px-4 py-3 text-sm text-zinc-950 outline-none transition focus:border-[var(--brand-primary)] focus:ring-4 focus:ring-[var(--brand-ring-soft)]";
 
 export function ContactForm() {
   const [values, setValues] = useState<ContactInquiryPayload>(initialValues);
@@ -182,7 +182,7 @@ export function ContactForm() {
           type="submit"
           size="lg"
           disabled={isSubmitting}
-          className="h-12 rounded-full bg-[#f2c400] px-6 text-zinc-950 hover:bg-yellow-300 disabled:cursor-not-allowed disabled:bg-zinc-500"
+          className="h-12 rounded-full bg-[var(--brand-primary)] px-6 text-zinc-950 hover:bg-[var(--brand-primary-hover)] disabled:cursor-not-allowed disabled:bg-zinc-500"
         >
           {isSubmitting ? "Enviando..." : "Enviar consulta"}
         </Button>

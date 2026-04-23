@@ -163,7 +163,7 @@ export function VehicleInfiniteList({
               variant="outline"
               disabled={isLoading}
               onClick={() => void loadMore()}
-              className="h-12 rounded-full border-zinc-950 bg-zinc-950 px-6 text-[#f2c400] hover:bg-zinc-900 disabled:cursor-not-allowed"
+              className="h-12 rounded-full border-zinc-950 bg-zinc-950 px-6 text-[var(--brand-primary)] hover:bg-zinc-900 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>

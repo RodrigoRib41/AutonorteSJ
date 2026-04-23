@@ -33,7 +33,7 @@ export function Hero() {
   return (
     <section
       id="inicio"
-      className="relative overflow-hidden border-b border-black/15 bg-[#f2c400]"
+      className="relative overflow-hidden border-b border-black/15 bg-[var(--brand-primary)]"
     >
       <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(90deg,rgba(0,0,0,.12)_1px,transparent_1px)] [background-size:18px_100%]" />
       <div className="absolute -right-20 bottom-0 hidden h-72 w-64 skew-x-[-16deg] bg-zinc-950 lg:block" />
@@ -60,7 +60,7 @@ export function Hero() {
             <Button
               asChild
               size="lg"
-              className="h-12 w-full rounded-full bg-zinc-950 px-6 text-[#f2c400] shadow-[0_16px_34px_rgba(0,0,0,0.22)] hover:bg-zinc-900 sm:w-auto"
+              className="h-12 w-full rounded-full bg-zinc-950 px-6 text-[var(--brand-primary)] shadow-[0_16px_34px_rgba(0,0,0,0.22)] hover:bg-zinc-900 sm:w-auto"
             >
               <Link href="#vehiculos">
                 Ver destacados
@@ -88,7 +88,7 @@ export function Hero() {
             />
 
             <div className="min-w-0 border-t border-zinc-200 bg-zinc-950 p-5 sm:border-t-0 sm:border-l sm:border-zinc-800 sm:p-6 lg:border-t lg:border-l-0 xl:border-t-0 xl:border-l">
-              <p className="text-xs font-semibold tracking-[0.26em] text-[#f2c400] uppercase">
+              <p className="text-xs font-semibold tracking-[0.26em] text-[var(--brand-primary)] uppercase">
                 Stock y financiacion
               </p>
               <h2 className="mt-3 text-xl font-semibold tracking-tight text-white sm:text-2xl">
@@ -105,7 +105,7 @@ export function Hero() {
               <p className="text-xs font-semibold tracking-[0.26em] text-zinc-700 uppercase">
                 Servicios
               </p>
-              <div className="rounded-2xl bg-[#f2c400] p-3 text-zinc-950 shadow-sm">
+              <div className="rounded-2xl bg-[var(--brand-primary)] p-3 text-zinc-950 shadow-sm">
                 <BadgeCheck className="size-5" />
               </div>
             </div>
@@ -117,10 +117,10 @@ export function Hero() {
                 return (
                   <article
                     key={point.title}
-                    className="rounded-[1.25rem] border border-zinc-200 bg-[#fff8d6] p-4 shadow-sm sm:p-5"
+                    className="rounded-[1.25rem] border border-zinc-200 bg-[var(--brand-soft)] p-4 shadow-sm sm:p-5"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="mt-1 rounded-full bg-zinc-950 p-2 text-[#f2c400]">
+                      <div className="mt-1 rounded-full bg-zinc-950 p-2 text-[var(--brand-primary)]">
                         <Icon className="size-4" />
                       </div>
                       <div className="min-w-0">

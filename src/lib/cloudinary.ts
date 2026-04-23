@@ -2,7 +2,8 @@ import { v2 as cloudinary, type UploadApiResponse } from "cloudinary";
 
 import {
   getVehicleImageFolder,
-  VEHICLE_IMAGE_UPLOAD_TRANSFORMATION,
+  VEHICLE_IMAGE_UPLOAD_MAX_HEIGHT,
+  VEHICLE_IMAGE_UPLOAD_MAX_WIDTH,
 } from "@/lib/cloudinary-images";
 
 let isConfigured = false;
@@ -52,7 +53,13 @@ export async function uploadVehicleImageToCloudinary(options: {
         asset_folder: getVehicleImageFolder(options.vehicleId),
         public_id: options.publicId,
         resource_type: "image",
-        transformation: VEHICLE_IMAGE_UPLOAD_TRANSFORMATION,
+        transformation: [
+          {
+            crop: "limit",
+            height: VEHICLE_IMAGE_UPLOAD_MAX_HEIGHT,
+            width: VEHICLE_IMAGE_UPLOAD_MAX_WIDTH,
+          },
+        ],
         use_filename: false,
         unique_filename: false,
         overwrite: false,

@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum VehicleCurrency {
+  USD
+  ARS
+}
+
+enum VehicleCondition {
+  ZERO_KM
+  USED
+}
+
+enum VehicleCategory {
+  CAR
+  PICKUP
+  SUV
+  MOTORCYCLE
+  VAN
+  TRUCK
+  OTHER
+}
+
+enum AdminRole {
+  SUPERADMIN
+  GESTOR
+}
+
+enum VehicleAuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  RESTORE
+}
+
+enum VehicleRestoreAction {
+  UPDATE
+  DELETE
+}
+
+model ContactInquiry {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String
+  message   String
+  createdAt DateTime @default(now())
+}
+
+model VehicleInquiry {
+  id          String   @id @default(cuid())
+  vehicleId   String
+  vehicleName String
+  name        String
+  email       String
+  phone       String
+  message     String
+  createdAt   DateTime @default(now())
+}
+
+model Vehicle {
+  id               String                @id @default(cuid())
+  marca            String
+  modelo           String
+  condition        VehicleCondition      @default(USED)
+  category         VehicleCategory       @default(CAR)
+  anio             Int
+  kilometraje      Int
+  precio           Int
+  promotionalPrice Int?
+  currency         VehicleCurrency       @default(USD)
+  descripcion      String?
+  destacado        Boolean               @default(false)
+  createdByUserId  String?
+  updatedByUserId  String?
+  deletedByUserId  String?
+  deletedAt        DateTime?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  images           VehicleImage[]
+  createdBy        AdminUser?            @relation("VehicleCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  updatedBy        AdminUser?            @relation("VehicleUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+  deletedBy        AdminUser?            @relation("VehicleDeletedBy", fields: [deletedByUserId], references: [id], onDelete: SetNull)
+  restorePoints    VehicleRestorePoint[]
+
+  @@index([createdByUserId])
+  @@index([updatedByUserId])
+  @@index([deletedByUserId])
+  @@index([deletedAt, updatedAt])
+  @@index([category, deletedAt])
+}
+
+model VehicleImage {
+  id        String   @id @default(cuid())
+  vehicleId String
+  publicId  String
+  assetId   String?  @unique
+  alt       String?
+  sortOrder Int
+  isPrimary Boolean  @default(false)
+  width     Int?
+  height    Int?
+  format    String?
+  bytes     Int?
+  createdAt DateTime @default(now())
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleId, sortOrder])
+  @@index([vehicleId, isPrimary])
+}
+
+model AdminUser {
+  id                           String                @id @default(cuid())
+  name                         String
+  username                     String?               @unique
+  email                        String?               @unique
+  passwordHash                 String
+  role                         AdminRole             @default(GESTOR)
+  createdAt                    DateTime              @default(now())
+  updatedAt                    DateTime              @updatedAt
+  createdVehicles              Vehicle[]             @relation("VehicleCreatedBy")
+  updatedVehicles              Vehicle[]             @relation("VehicleUpdatedBy")
+  deletedVehicles              Vehicle[]             @relation("VehicleDeletedBy")
+  vehicleAuditLogs             VehicleAuditLog[]     @relation("VehicleAuditActor")
+  vehicleRestorePoints         VehicleRestorePoint[] @relation("VehicleRestorePointActor")
+  restoredVehicleRestorePoints VehicleRestorePoint[] @relation("VehicleRestorePointRestoredBy")
+
+  @@index([role])
+}
+
+model VehicleAuditLog {
+  id           String             @id @default(cuid())
+  vehicleId    String
+  vehicleLabel String
+  action       VehicleAuditAction
+  actorUserId  String?
+  actorName    String?
+  actorEmail   String?
+  createdAt    DateTime           @default(now())
+  actor        AdminUser?         @relation("VehicleAuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([vehicleId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([action, createdAt])
+}
+
+model VehicleRestorePoint {
+  id               String               @id @default(cuid())
+  vehicleId        String
+  vehicleLabel     String
+  action           VehicleRestoreAction
+  summary          String?
+  snapshot         Json
+  actorUserId      String?
+  actorName        String?
+  actorEmail       String?
+  createdAt        DateTime             @default(now())
+  expiresAt        DateTime
+  restoredAt       DateTime?
+  restoredByUserId String?
+  restoredByName   String?
+  restoredByEmail  String?
+  vehicle          Vehicle              @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  actor            AdminUser?           @relation("VehicleRestorePointActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  restoredBy       AdminUser?           @relation("VehicleRestorePointRestoredBy", fields: [restoredByUserId], references: [id], onDelete: SetNull)
+
+  @@index([vehicleId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([action, createdAt])
+  @@index([expiresAt])
+  @@index([restoredAt, expiresAt])
+}

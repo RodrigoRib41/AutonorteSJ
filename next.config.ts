@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 
 const securityHeaders = [
   {
@@ -30,6 +31,7 @@ const nextConfig: NextConfig = {
       process.env.CLOUDINARY_CLOUD_NAME ??
       "",
   },
+  serverExternalPackages: ["@prisma/client", ".prisma/client"],
   images: {
     deviceSizes: [360, 414, 640, 768, 1024, 1280, 1600, 1920],
     imageSizes: [80, 160, 240, 320, 480],
@@ -71,5 +73,7 @@ const nextConfig: NextConfig = {
     ];
   },
 };
+
+initOpenNextCloudflareForDev();
 
 export default nextConfig;

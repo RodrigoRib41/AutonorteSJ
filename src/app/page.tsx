@@ -4,7 +4,7 @@ import { Hero } from "@/components/home/hero";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export default function HomePage() {
   return (

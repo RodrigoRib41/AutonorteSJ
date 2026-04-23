@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import type { ImgHTMLAttributes } from "react";
+import { forwardRef, type ImgHTMLAttributes } from "react";
 
 import {
   buildVehicleImageSrcSet,
@@ -21,22 +21,29 @@ type CloudinaryVehicleImageProps = Omit<
   variant?: VehicleImageVariant;
 };
 
-export function CloudinaryVehicleImage({
-  alt,
-  className,
-  fill = false,
-  format,
-  preload = false,
-  publicId,
-  variant = "card",
-  ...imageProps
-}: CloudinaryVehicleImageProps) {
+export const CloudinaryVehicleImage = forwardRef<
+  HTMLImageElement,
+  CloudinaryVehicleImageProps
+>(function CloudinaryVehicleImage(
+  {
+    alt,
+    className,
+    fill = false,
+    format,
+    preload = false,
+    publicId,
+    variant = "card",
+    ...imageProps
+  },
+  ref
+) {
   const src = format ? `${publicId}.${format.replace(/^\./, "")}` : publicId;
   const fallbackWidth = getVehicleImageVariantMaxWidth(variant);
 
   return (
     <img
       {...imageProps}
+      ref={ref}
       alt={alt}
       className={cn(fill ? "absolute inset-0 h-full w-full" : "", className)}
       decoding="async"
@@ -52,4 +59,4 @@ export function CloudinaryVehicleImage({
       })}
     />
   );
-}
+});

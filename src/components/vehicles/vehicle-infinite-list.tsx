@@ -51,6 +51,7 @@ export function VehicleInfiniteList({
   const [nextOffset, setNextOffset] = useState(initialVehicles.length);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const unitLabel = totalCount === 1 ? "unidad" : "unidades";
 
   const hasMore = nextOffset < totalCount;
 
@@ -139,8 +140,7 @@ export function VehicleInfiniteList({
           </h2>
         </div>
         <p className="w-fit rounded-full border border-zinc-950/10 bg-white/80 px-3 py-2 text-sm text-zinc-600">
-          Mostrando {vehicles.length} de {totalCount} unidad
-          {totalCount === 1 ? "" : "s"}.
+          Mostrando {vehicles.length} de {totalCount} {unitLabel}.
         </p>
       </div>
 

@@ -23,7 +23,7 @@ export type VehicleImageVariant =
   | "lightbox";
 
 type VehicleImageVariantConfig = {
-  crop: "fill" | "limit";
+  crop: "fill" | "limit" | "none";
   aspectRatio?: number;
   maxWidth: number;
   quality: "q_auto" | "q_auto:best";
@@ -70,10 +70,10 @@ const vehicleImageVariantConfig: Record<
     widths: [640, 768, 1024, 1280, 1600],
   },
   lightbox: {
-    crop: "limit",
+    crop: "none",
     maxWidth: 2400,
     quality: "q_auto:best",
-    widths: [1024, 1280, 1600, 1920, 2400],
+    widths: [2400],
   },
 };
 
@@ -213,6 +213,10 @@ export function buildVehicleImageTransformation(
 ) {
   const config = vehicleImageVariantConfig[variant];
   const safeWidth = getCanonicalVehicleImageWidth(variant, width);
+
+  if (config.crop === "none") {
+    return `${VEHICLE_IMAGE_DELIVERY_CACHE_FLAG}/f_auto/${config.quality}`;
+  }
 
   if (config.crop === "limit") {
     return `c_limit,${VEHICLE_IMAGE_DELIVERY_CACHE_FLAG},w_${safeWidth}/f_auto/${config.quality}`;

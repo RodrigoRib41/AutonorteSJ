@@ -10,6 +10,8 @@ import {
   getAdminUsername,
   getAdminUsers,
   getAdminUsersSummary,
+  type AdminUserRecord,
+  type AdminUsersSummary,
 } from "@/lib/admin-users";
 import { requireAdminPageAccess, superadminOnlyRoles } from "@/lib/admin-auth";
 
@@ -25,10 +27,11 @@ function formatDate(value: Date) {
 export default async function AdminUsersPage() {
   const currentAdmin = await requireAdminPageAccess(superadminOnlyRoles);
 
-  const [users, summary] = await Promise.all([
-    getAdminUsers(),
-    getAdminUsersSummary(),
-  ]);
+  const [users, summary]: [AdminUserRecord[], AdminUsersSummary] =
+    await Promise.all([
+      getAdminUsers(),
+      getAdminUsersSummary(),
+    ]);
 
   return (
     <div className="space-y-8">
@@ -118,7 +121,7 @@ export default async function AdminUsersPage() {
           </div>
 
           <div className="mt-8 space-y-4">
-            {users.map((user) => {
+            {users.map((user: AdminUserRecord) => {
               const username = getAdminUsername(user);
 
               return (

@@ -25,6 +25,7 @@ import {
   getVehicleDisplayPrice,
   getVehiclePrimaryImage,
   hasVehiclePromotion,
+  type VehiclePersisted,
 } from "@/lib/vehicle-records";
 import { getAdminDisplayName } from "@/lib/admin-users";
 
@@ -40,11 +41,12 @@ export default async function AdminVehiclesPage({
   await requireAdminPageAccess(vehicleManagerRoles);
 
   const filters = parseVehicleFilters(await searchParams);
-  const [vehicles, brands, totalCount] = await Promise.all([
-    getVehicles(filters),
-    getVehicleBrands(),
-    getVehicleCount(),
-  ]);
+  const [vehicles, brands, totalCount]: [VehiclePersisted[], string[], number] =
+    await Promise.all([
+      getVehicles(filters),
+      getVehicleBrands(),
+      getVehicleCount(),
+    ]);
   const hasFilters = hasActiveVehicleFilters(filters, {
     includeAdminFields: true,
   });
@@ -149,7 +151,7 @@ export default async function AdminVehiclesPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
-                {vehicles.map((vehicle) => {
+                {vehicles.map((vehicle: VehiclePersisted) => {
                   const primaryImage = getVehiclePrimaryImage(vehicle);
                   const hasPromotion = hasVehiclePromotion(vehicle);
                   const displayPrice = getVehicleDisplayPrice(vehicle);

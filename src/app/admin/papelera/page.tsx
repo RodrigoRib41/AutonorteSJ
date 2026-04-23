@@ -140,7 +140,7 @@ export default async function AdminTrashPage() {
         </section>
       ) : (
         <section className="space-y-4">
-          {restorePoints.map((point) => {
+          {restorePoints.map((point: VehicleRestorePointRecord) => {
             const snapshot = parseVehicleRestoreSnapshot(point.snapshot);
             const snapshotVehicle = snapshot?.vehicle;
             const daysUntilExpiry = getDaysUntilExpiry(point.expiresAt, now);

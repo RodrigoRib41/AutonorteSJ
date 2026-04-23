@@ -5,7 +5,10 @@ import {
   getVehicleWhereInput,
   type VehicleFilterValues,
 } from "@/lib/vehicle-filters";
-import { vehicleWithImagesInclude } from "@/lib/vehicle-records";
+import {
+  vehicleWithImagesInclude,
+  type VehiclePersisted,
+} from "@/lib/vehicle-records";
 import {
   vehicleAuditLogInclude,
   type VehicleAuditLogRecord,
@@ -15,7 +18,9 @@ const activeVehicleWhere = {
   deletedAt: null,
 };
 
-export async function getVehicles(filters?: VehicleFilterValues) {
+export async function getVehicles(
+  filters?: VehicleFilterValues
+): Promise<VehiclePersisted[]> {
   return getPaginatedVehicles(filters);
 }
 
@@ -25,7 +30,7 @@ export async function getPaginatedVehicles(
     skip?: number;
     take?: number;
   }
-) {
+): Promise<VehiclePersisted[]> {
   return getPrismaClient().vehicle.findMany({
     include: vehicleWithImagesInclude,
     where: filters ? getVehicleWhereInput(filters) : activeVehicleWhere,
@@ -35,7 +40,9 @@ export async function getPaginatedVehicles(
   });
 }
 
-export async function getFeaturedVehicles(limit = 3) {
+export async function getFeaturedVehicles(
+  limit = 3
+): Promise<VehiclePersisted[]> {
   return getPrismaClient().vehicle.findMany({
     include: vehicleWithImagesInclude,
     where: {
@@ -47,7 +54,9 @@ export async function getFeaturedVehicles(limit = 3) {
   });
 }
 
-export async function getVehicleById(id: string) {
+export async function getVehicleById(
+  id: string
+): Promise<VehiclePersisted | null> {
   return getPrismaClient().vehicle.findFirst({
     include: vehicleWithImagesInclude,
     where: {

@@ -32,6 +32,12 @@ export type AdminUserRecord = Prisma.AdminUserGetPayload<{
   select: typeof adminUserSelect;
 }>;
 
+export type AdminUsersSummary = {
+  totalUsers: number;
+  superadminCount: number;
+  gestorCount: number;
+};
+
 export type AdminUserPayload = {
   name: string;
   username: string;
@@ -308,7 +314,7 @@ export async function ensureBootstrapSuperadmin() {
   });
 }
 
-export async function getAdminUsers() {
+export async function getAdminUsers(): Promise<AdminUserRecord[]> {
   const users = await getPrismaClient().adminUser.findMany({
     select: adminUserSelect,
     orderBy: [{ role: "asc" }, { name: "asc" }, { createdAt: "asc" }],
@@ -323,7 +329,7 @@ export async function getAdminUsers() {
   });
 }
 
-export async function getAdminUsersSummary() {
+export async function getAdminUsersSummary(): Promise<AdminUsersSummary> {
   const prisma = getPrismaClient();
   const [totalUsers, superadminCount, gestorCount] = await Promise.all([
     prisma.adminUser.count(),

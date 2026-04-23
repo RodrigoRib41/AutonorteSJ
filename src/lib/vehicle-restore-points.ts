@@ -414,7 +414,9 @@ export function getVehicleRestoreActorLabel(log: {
   );
 }
 
-export async function getActiveVehicleRestorePoints(now = new Date()) {
+export async function getActiveVehicleRestorePoints(
+  now = new Date()
+): Promise<VehicleRestorePointRecord[]> {
   return getPrismaClient().vehicleRestorePoint.findMany({
     include: vehicleRestorePointInclude,
     where: {

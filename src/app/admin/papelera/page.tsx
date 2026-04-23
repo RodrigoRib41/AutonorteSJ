@@ -17,6 +17,7 @@ import {
   getVehicleRestoreActorLabel,
   parseVehicleRestoreSnapshot,
   purgeExpiredVehicleRestorePoints,
+  type VehicleRestorePointRecord,
   VEHICLE_RESTORE_RETENTION_DAYS,
 } from "@/lib/vehicle-restore-points";
 
@@ -41,9 +42,14 @@ export default async function AdminTrashPage() {
   const now = new Date();
   await purgeExpiredVehicleRestorePoints(now);
 
-  const restorePoints = await getActiveVehicleRestorePoints(now);
-  const deletedCount = restorePoints.filter((point) => point.action === "DELETE").length;
-  const updateCount = restorePoints.filter((point) => point.action === "UPDATE").length;
+  const restorePoints: VehicleRestorePointRecord[] =
+    await getActiveVehicleRestorePoints(now);
+  const deletedCount = restorePoints.filter(
+    (point) => point.action === "DELETE"
+  ).length;
+  const updateCount = restorePoints.filter(
+    (point) => point.action === "UPDATE"
+  ).length;
 
   return (
     <div className="space-y-8">

@@ -2,8 +2,8 @@ import Link from "next/link";
 import { ShieldCheck, TimerReset, Users } from "lucide-react";
 import { redirect } from "next/navigation";
 
-import { auth } from "@/auth";
 import { LoginForm } from "@/components/auth/login-form";
+import { getAuthenticatedAdmin } from "@/lib/admin-auth";
 
 const trustPoints = [
   {
@@ -27,9 +27,9 @@ const trustPoints = [
 ];
 
 export default async function LoginPage() {
-  const session = await auth();
+  const admin = await getAuthenticatedAdmin();
 
-  if (session) {
+  if (admin) {
     redirect("/admin");
   }
 

@@ -9,6 +9,7 @@ import {
   getInitialVehicleInquiryMessage,
   validateVehicleInquiry,
 } from "@/lib/inquiry-payloads";
+import { submitVehicleInquiry } from "@/lib/supabase-data";
 
 type VehicleInquiryFormProps = {
   vehicleId: string;
@@ -73,22 +74,12 @@ export function VehicleInquiryForm({
     setSuccessMessage("");
 
     try {
-      const response = await fetch("/api/vehicle-inquiry", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-
-      const result = (await response
-        .json()
-        .catch(() => null)) as InquiryResponse<
+      const result = (await submitVehicleInquiry(values)) as InquiryResponse<
         keyof VehicleInquiryPayload
-      > | null;
+      >;
 
-      if (!response.ok || !result || !result.success) {
-        setErrors(result && !result.success ? result.fieldErrors ?? {} : {});
+      if (!result.success) {
+        setErrors(result.fieldErrors ?? {});
         setErrorMessage(
           result?.message ??
             "No pudimos enviar tu consulta en este momento. Intenta nuevamente."

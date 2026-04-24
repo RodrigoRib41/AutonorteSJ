@@ -1,37 +1,41 @@
+"use client";
+
 import Link from "next/link";
 import { ShieldCheck, TimerReset, Users } from "lucide-react";
-import { redirect } from "next/navigation";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import { LoginForm } from "@/components/auth/login-form";
-import { getAuthenticatedAdmin } from "@/lib/admin-auth";
+import { useAuth } from "@/components/providers/auth-provider";
 
 const trustPoints = [
   {
     title: "Acceso protegido",
-    description:
-      "Ingreso reservado para el equipo autorizado.",
+    description: "Ingreso reservado para el equipo autorizado.",
     icon: ShieldCheck,
   },
   {
     title: "Usuarios y roles",
-    description:
-      "Permisos para administradores y gestores.",
+    description: "Permisos para administradores y gestores.",
     icon: Users,
   },
   {
     title: "Primer acceso",
     description:
-      "El superadmin inicial permite cargar nuevos usuarios.",
+      "El superadmin inicial se gestiona desde Supabase Auth y la tabla admin_users.",
     icon: TimerReset,
   },
 ];
 
-export default async function LoginPage() {
-  const admin = await getAuthenticatedAdmin();
+export default function LoginPage() {
+  const router = useRouter();
+  const { admin, isLoading } = useAuth();
 
-  if (admin) {
-    redirect("/admin");
-  }
+  useEffect(() => {
+    if (!isLoading && admin?.isActive) {
+      router.replace("/admin");
+    }
+  }, [admin, isLoading, router]);
 
   return (
     <main className="min-h-screen bg-[var(--brand-canvas)] px-4 py-10 sm:px-6 lg:px-8">
@@ -103,16 +107,9 @@ export default async function LoginPage() {
               Acceso institucional
             </p>
             <p className="mt-3 text-sm leading-7 text-zinc-600">
-              Para el primer acceso completa{" "}
-              <span className="font-medium text-zinc-950">AUTH_SECRET</span>,{" "}
-              <span className="font-medium text-zinc-950">
-                AUTH_ADMIN_USER
-              </span>{" "}
-              y{" "}
-              <span className="font-medium text-zinc-950">
-                AUTH_ADMIN_PASSWORD
-              </span>{" "}
-              en tu entorno. Luego podes crear mas usuarios desde el panel.
+              El login usa Supabase Auth y valida el perfil contra{" "}
+              <span className="font-medium text-zinc-950">admin_users</span>.
+              El superadmin puede seguir gestionando accesos desde el panel.
             </p>
           </div>
         </section>

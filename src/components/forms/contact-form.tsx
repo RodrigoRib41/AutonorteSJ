@@ -8,6 +8,7 @@ import {
   type InquiryResponse,
   validateContactInquiry,
 } from "@/lib/inquiry-payloads";
+import { submitContactInquiry } from "@/lib/supabase-data";
 
 type ContactFormErrors = Partial<Record<keyof ContactInquiryPayload, string>>;
 
@@ -64,22 +65,12 @@ export function ContactForm() {
     setSuccessMessage("");
 
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-
-      const result = (await response
-        .json()
-        .catch(() => null)) as InquiryResponse<
+      const result = (await submitContactInquiry(values)) as InquiryResponse<
         keyof ContactInquiryPayload
-      > | null;
+      >;
 
-      if (!response.ok || !result || !result.success) {
-        setErrors(result && !result.success ? result.fieldErrors ?? {} : {});
+      if (!result.success) {
+        setErrors(result.fieldErrors ?? {});
         setErrorMessage(
           result?.message ??
             "No pudimos enviar tu consulta en este momento. Intenta nuevamente."

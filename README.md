@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AutonorteSJ
 
-## Getting Started
+Proyecto Next.js preparado para desplegar la UI en Cloudflare Pages y usar
+Supabase como backend externo.
 
-First, run the development server:
+## Stack actual
+
+- Next.js 16
+- Supabase
+  - Auth para acceso al panel
+  - Postgres como base de datos
+  - Edge Functions para operaciones privilegiadas del admin
+- Cloudinary para imagenes
+
+## Variables de entorno del frontend
+
+Copiar `.env.example` y completar:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Supabase
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+El repo incluye:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `supabase/migrations/20260423223000_cloudflare_pages_supabase.sql`
+- `supabase/functions/admin-users`
+- `supabase/functions/admin-vehicles`
+- `supabase/functions/vehicle-images`
+- `supabase/functions/vehicle-restore-points`
 
-## Learn More
+### Secrets esperados en Edge Functions
 
-To learn more about Next.js, take a look at the following resources:
+Configurar en Supabase Functions:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Desarrollo local
 
-## Deploy on Vercel
+```bash
+npm install
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Build
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run build
+```
+
+Con `output: "export"`, Next genera el sitio listo para hosting estatico en:
+
+```bash
+out/
+```
+
+## Flujo de deploy recomendado
+
+1. Deploy del frontend en Cloudflare Pages.
+2. Ejecutar la migracion SQL en Supabase.
+3. Deploy de las Edge Functions de Supabase.
+4. Cargar variables del frontend en Cloudflare Pages.
+
+### Cloudflare Pages
+
+- Build command: `npm run build`
+- Build output directory: `out`
+
+### Supabase CLI
+
+```bash
+supabase db push
+supabase functions deploy admin-users
+supabase functions deploy admin-vehicles
+supabase functions deploy vehicle-images
+supabase functions deploy vehicle-restore-points
+```
+
+## Nota de arquitectura
+
+La app ya no usa Prisma, NextAuth ni API routes de Next. Las consultas publicas
+y del panel leen desde Supabase, y las operaciones privilegiadas del admin se
+resuelven con Edge Functions.

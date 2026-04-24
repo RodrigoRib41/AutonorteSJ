@@ -1,37 +1,97 @@
-import { ShieldCheck, UserCog, Users } from "lucide-react";
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { Loader2, ShieldCheck, UserCog, Users } from "lucide-react";
 
 import { DeleteAdminUserButton } from "@/components/admin/delete-admin-user-button";
 import { ResetAdminUserPasswordForm } from "@/components/admin/reset-admin-user-password-form";
 import { UserForm } from "@/components/admin/user-form";
+import { AdminGuard } from "@/components/auth/admin-guard";
+import { useAuth } from "@/components/providers/auth-provider";
+import { superadminOnlyRoles } from "@/lib/admin-auth";
 import {
   getAdminDisplayName,
   getAdminRoleDescription,
   getAdminRoleLabel,
   getAdminUsername,
-  getAdminUsers,
-  getAdminUsersSummary,
+  type AdminUserApiRecord,
   type AdminUserRecord,
   type AdminUsersSummary,
 } from "@/lib/admin-users";
-import { requireAdminPageAccess, superadminOnlyRoles } from "@/lib/admin-auth";
+import { fetchAdminUsers } from "@/lib/supabase-data";
 
-export const dynamic = "force-dynamic";
-
-function formatDate(value: Date) {
+function formatDate(value: string) {
   return new Intl.DateTimeFormat("es-AR", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(value);
+  }).format(new Date(value));
 }
 
-export default async function AdminUsersPage() {
-  const currentAdmin = await requireAdminPageAccess(superadminOnlyRoles);
+function buildSummary(users: AdminUserRecord[]): AdminUsersSummary {
+  return {
+    totalUsers: users.length,
+    superadminCount: users.filter((user) => user.role === "SUPERADMIN").length,
+    gestorCount: users.filter((user) => user.role === "GESTOR").length,
+  };
+}
 
-  const [users, summary]: [AdminUserRecord[], AdminUsersSummary] =
-    await Promise.all([
-      getAdminUsers(),
-      getAdminUsersSummary(),
-    ]);
+function AdminUsersContent() {
+  const { admin: currentAdmin } = useAuth();
+  const [users, setUsers] = useState<AdminUserRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadUsers() {
+      setIsLoading(true);
+      setErrorMessage("");
+
+      try {
+        const nextUsers = await fetchAdminUsers();
+
+        if (!isMounted) {
+          return;
+        }
+
+        setUsers(nextUsers);
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "No pudimos cargar los usuarios del panel."
+        );
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadUsers();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const summary = useMemo(() => buildSummary(users), [users]);
+
+  if (isLoading) {
+    return (
+      <section className="rounded-[2rem] border border-zinc-200 bg-white p-10 text-center shadow-[0_24px_60px_rgba(24,24,27,0.06)]">
+        <div className="inline-flex items-center gap-3 rounded-full border border-zinc-200 bg-zinc-50 px-5 py-3 text-sm text-zinc-600">
+          <Loader2 className="size-4 animate-spin" />
+          Cargando usuarios del panel...
+        </div>
+      </section>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -98,7 +158,17 @@ export default async function AdminUsersPage() {
           </div>
 
           <div className="mt-8">
-            <UserForm />
+            <UserForm
+              onSuccess={(user: AdminUserApiRecord) => {
+                setUsers((current) => [
+                  {
+                    ...user,
+                    username: user.username || user.email || user.name,
+                  },
+                  ...current.filter((currentUser) => currentUser.id !== user.id),
+                ]);
+              }}
+            />
           </div>
         </div>
 
@@ -119,6 +189,12 @@ export default async function AdminUsersPage() {
               </p>
             </div>
           </div>
+
+          {errorMessage ? (
+            <div className="mt-6 rounded-[1.25rem] border border-red-200 bg-red-50 px-4 py-3 text-sm leading-7 text-red-700">
+              {errorMessage}
+            </div>
+          ) : null}
 
           <div className="mt-8 space-y-4">
             {users.map((user: AdminUserRecord) => {
@@ -153,7 +229,7 @@ export default async function AdminUsersPage() {
                       {getAdminRoleLabel(user.role)}
                     </span>
 
-                    {user.id === currentAdmin.id ? (
+                    {user.id === currentAdmin?.id ? (
                       <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-500">
                         Tu usuario
                       </span>
@@ -162,6 +238,13 @@ export default async function AdminUsersPage() {
                         userId={user.id}
                         userUsername={username}
                         userName={getAdminDisplayName(user)}
+                        onDeleted={(deletedUserId) => {
+                          setUsers((current) =>
+                            current.filter(
+                              (currentUser) => currentUser.id !== deletedUserId
+                            )
+                          );
+                        }}
                       />
                     ) : (
                       <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-500">
@@ -171,10 +254,26 @@ export default async function AdminUsersPage() {
                   </div>
                 </div>
 
-                {user.role === "GESTOR" && user.id !== currentAdmin.id ? (
+                {user.role === "GESTOR" && user.id !== currentAdmin?.id ? (
                   <ResetAdminUserPasswordForm
                     userId={user.id}
                     userUsername={username}
+                    onSuccess={(updatedUser) => {
+                      setUsers((current) =>
+                        current.map((currentUser) =>
+                          currentUser.id === updatedUser.id
+                            ? {
+                                ...currentUser,
+                                ...updatedUser,
+                                username:
+                                  updatedUser.username ||
+                                  updatedUser.email ||
+                                  updatedUser.name,
+                              }
+                            : currentUser
+                        )
+                      );
+                    }}
                   />
                 ) : null}
 
@@ -191,21 +290,21 @@ export default async function AdminUsersPage() {
             <div className="flex items-start gap-3">
               <ShieldCheck className="mt-1 size-4 shrink-0 text-zinc-950" />
               <p>
-                El superadmin administra los usuarios gestores. Para el primer
-                acceso usa{" "}
-                <span className="font-medium text-zinc-950">
-                  AUTH_ADMIN_USER
-                </span>{" "}
-                y{" "}
-                <span className="font-medium text-zinc-950">
-                  AUTH_ADMIN_PASSWORD
-                </span>
-                .
+                El superadmin administra los accesos desde Supabase Auth y la
+                tabla <span className="font-medium text-zinc-950">admin_users</span>.
               </p>
             </div>
           </div>
         </div>
       </section>
     </div>
+  );
+}
+
+export default function AdminUsersPage() {
+  return (
+    <AdminGuard allowedRoles={superadminOnlyRoles}>
+      <AdminUsersContent />
+    </AdminGuard>
   );
 }

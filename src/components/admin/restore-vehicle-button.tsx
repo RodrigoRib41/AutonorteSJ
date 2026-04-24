@@ -1,24 +1,25 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loader2, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type { VehicleRestoreResponse } from "@/lib/vehicle-restore-points";
+import { restoreVehicle } from "@/lib/supabase-data";
 
 type RestoreVehicleButtonProps = {
   restorePointId: string;
   action: "UPDATE" | "DELETE";
   vehicleLabel: string;
+  onRestored?: (restorePointId: string) => void;
 };
 
 export function RestoreVehicleButton({
   restorePointId,
   action,
   vehicleLabel,
+  onRestored,
 }: RestoreVehicleButtonProps) {
-  const router = useRouter();
   const [isRestoring, setIsRestoring] = useState(false);
 
   async function handleRestore() {
@@ -35,24 +36,18 @@ export function RestoreVehicleButton({
     setIsRestoring(true);
 
     try {
-      const response = await fetch(
-        `/api/admin/vehicle-restore-points/${restorePointId}/restore`,
-        {
-          method: "POST",
-        }
-      );
-      const result = (await response
-        .json()
-        .catch(() => null)) as VehicleRestoreResponse | null;
+      const result = (await restoreVehicle(
+        restorePointId
+      )) as VehicleRestoreResponse;
 
-      if (!response.ok || !result?.success) {
+      if (!result?.success) {
         window.alert(
           result?.message ?? "No pudimos restaurar el vehiculo en este momento."
         );
         return;
       }
 
-      router.refresh();
+      onRestored?.(restorePointId);
     } catch {
       window.alert("No pudimos restaurar el vehiculo en este momento.");
     } finally {

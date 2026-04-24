@@ -1,14 +1,42 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { VehicleCard } from "@/components/vehicles/vehicle-card";
-import { getPublicFeaturedVehicles } from "@/lib/public-vehicle-queries";
+import { fetchFeaturedVehicles } from "@/lib/supabase-data";
+import type { VehiclePreview } from "@/lib/vehicle-records";
 
-export async function FeaturedVehicles() {
-  const featuredVehicles = await getPublicFeaturedVehicles(3);
+export function FeaturedVehicles() {
+  const [featuredVehicles, setFeaturedVehicles] = useState<VehiclePreview[]>([]);
+  const [hasLoaded, setHasLoaded] = useState(false);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    fetchFeaturedVehicles(3)
+      .then((vehicles) => {
+        if (!isCancelled) {
+          setFeaturedVehicles(vehicles);
+        }
+      })
+      .finally(() => {
+        if (!isCancelled) {
+          setHasLoaded(true);
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   return (
-    <section id="vehiculos" className="relative overflow-hidden bg-[var(--brand-canvas)] py-16 sm:py-20 lg:py-24">
+    <section
+      id="vehiculos"
+      className="relative overflow-hidden bg-[var(--brand-canvas)] py-16 sm:py-20 lg:py-24"
+    >
       <div className="absolute inset-x-0 top-0 h-2 bg-[var(--brand-primary)]" />
       <div className="absolute -left-16 top-16 hidden h-40 w-28 skew-x-[-16deg] bg-zinc-950/90 lg:block" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -37,7 +65,7 @@ export async function FeaturedVehicles() {
               />
             ))}
           </div>
-        ) : (
+        ) : hasLoaded ? (
           <div className="mt-10 rounded-[1.5rem] border border-dashed border-zinc-950/30 bg-white/85 p-6 text-center shadow-[0_20px_50px_rgba(0,0,0,0.08)] sm:p-10">
             <h3 className="text-xl font-semibold tracking-tight text-zinc-950 sm:text-2xl">
               Pronto vamos a publicar nuevos destacados
@@ -46,6 +74,8 @@ export async function FeaturedVehicles() {
               Mientras tanto, podes consultar el stock completo.
             </p>
           </div>
+        ) : (
+          <div className="mt-10 h-[28rem] animate-pulse rounded-[1.5rem] border border-zinc-200 bg-white/80" />
         )}
 
         <div className="mt-10 flex justify-center">

@@ -1,24 +1,25 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type { AdminUserDeleteResponse } from "@/lib/admin-users";
+import { deleteAdminUser } from "@/lib/supabase-data";
 
 type DeleteAdminUserButtonProps = {
   userId: string;
   userUsername: string;
   userName: string;
+  onDeleted?: (userId: string) => void;
 };
 
 export function DeleteAdminUserButton({
   userId,
   userUsername,
   userName,
+  onDeleted,
 }: DeleteAdminUserButtonProps) {
-  const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
   async function handleDelete() {
@@ -33,15 +34,9 @@ export function DeleteAdminUserButton({
     setIsDeleting(true);
 
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
-        method: "DELETE",
-      });
+      const result = (await deleteAdminUser(userId)) as AdminUserDeleteResponse;
 
-      const result = (await response
-        .json()
-        .catch(() => null)) as AdminUserDeleteResponse | null;
-
-      if (!response.ok || !result?.success) {
+      if (!result?.success) {
         window.alert(
           result?.message ??
             "No pudimos eliminar el usuario gestor en este momento."
@@ -49,7 +44,7 @@ export function DeleteAdminUserButton({
         return;
       }
 
-      router.refresh();
+      onDeleted?.(userId);
     } catch {
       window.alert(
         "No pudimos eliminar el usuario gestor en este momento."

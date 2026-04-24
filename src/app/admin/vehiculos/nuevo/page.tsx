@@ -1,10 +1,58 @@
-import { VehicleForm } from "@/components/admin/vehicle-form";
-import { requireAdminPageAccess, vehicleManagerRoles } from "@/lib/admin-auth";
-import { getFeaturedVehicleReplacementOptions } from "@/lib/vehicle-featured";
+"use client";
 
-export default async function NewVehiclePage() {
-  await requireAdminPageAccess(vehicleManagerRoles);
-  const featuredVehicles = await getFeaturedVehicleReplacementOptions();
+import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
+
+import { VehicleForm } from "@/components/admin/vehicle-form";
+import { fetchFeaturedVehicleReplacementOptions } from "@/lib/supabase-data";
+import type { FeaturedVehicleOption } from "@/lib/vehicle-records";
+
+export default function NewVehiclePage() {
+  const [featuredVehicles, setFeaturedVehicles] = useState<
+    FeaturedVehicleOption[]
+  >([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadFeaturedVehicles() {
+      setIsLoading(true);
+      setErrorMessage("");
+
+      try {
+        const nextFeaturedVehicles =
+          await fetchFeaturedVehicleReplacementOptions();
+
+        if (!isMounted) {
+          return;
+        }
+
+        setFeaturedVehicles(nextFeaturedVehicles);
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "No pudimos preparar el formulario de alta."
+        );
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadFeaturedVehicles();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -20,8 +68,23 @@ export default async function NewVehiclePage() {
         </p>
       </section>
 
+      {errorMessage ? (
+        <section className="rounded-[1.5rem] border border-red-200 bg-red-50 px-5 py-4 text-sm leading-7 text-red-700">
+          {errorMessage}
+        </section>
+      ) : null}
+
       <section className="rounded-[2rem] border border-zinc-200 bg-white p-8 shadow-[0_24px_60px_rgba(24,24,27,0.06)] sm:p-10">
-        <VehicleForm mode="create" featuredVehicles={featuredVehicles} />
+        {isLoading ? (
+          <div className="flex min-h-[18rem] items-center justify-center">
+            <div className="inline-flex items-center gap-3 rounded-full border border-zinc-200 bg-zinc-50 px-5 py-3 text-sm text-zinc-600">
+              <Loader2 className="size-4 animate-spin" />
+              Preparando formulario...
+            </div>
+          </div>
+        ) : (
+          <VehicleForm mode="create" featuredVehicles={featuredVehicles} />
+        )}
       </section>
     </div>
   );

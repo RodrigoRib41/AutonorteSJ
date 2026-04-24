@@ -1,5 +1,3 @@
-import { type Prisma } from "@prisma/client";
-
 import {
   type AdminRoleValue,
   adminRoles,
@@ -7,30 +5,21 @@ import {
   getAdminRoleLabel,
   isAdminRole,
 } from "@/lib/admin-role-utils";
-import { getPrismaClient } from "@/lib/prisma";
-import { hashPassword, verifyPassword } from "@/lib/password";
 
 export { adminRoles, getAdminRoleDescription, getAdminRoleLabel, isAdminRole };
 export type { AdminRoleValue };
 
-export const adminUserSelect = {
-  id: true,
-  name: true,
-  username: true,
-  email: true,
-  role: true,
-  createdAt: true,
-  updatedAt: true,
-} satisfies Prisma.AdminUserSelect;
-
-const bootstrapAdminUserSelect = {
-  ...adminUserSelect,
-  passwordHash: true,
-} satisfies Prisma.AdminUserSelect;
-
-export type AdminUserRecord = Prisma.AdminUserGetPayload<{
-  select: typeof adminUserSelect;
-}>;
+export type AdminUserRecord = {
+  id: string;
+  authUserId: string | null;
+  name: string;
+  username: string;
+  email: string | null;
+  role: AdminRoleValue;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export type AdminUsersSummary = {
   totalUsers: number;
@@ -56,10 +45,12 @@ export type AdminUserPasswordResetFieldErrors = Partial<
 
 export type AdminUserApiRecord = {
   id: string;
+  authUserId: string | null;
   name: string;
   username: string;
   email: string | null;
   role: AdminRoleValue;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -122,6 +113,20 @@ export function normalizeAdminUsername(value: unknown) {
   return asString(value).toLowerCase();
 }
 
+export function serializeAdminUser(user: AdminUserRecord): AdminUserApiRecord {
+  return {
+    id: user.id,
+    authUserId: user.authUserId,
+    name: user.name,
+    username: user.username ?? user.email ?? user.name,
+    email: user.email,
+    role: user.role,
+    isActive: user.isActive,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
+}
+
 export function parseAdminUserPayload(input: unknown): AdminUserPayload {
   const data =
     input && typeof input === "object" ? (input as Record<string, unknown>) : {};
@@ -139,7 +144,7 @@ export function validateAdminUserPayload(
   const errors: AdminUserFieldErrors = {};
 
   if (payload.name.length < 2) {
-    errors.name = "Ingresa un nombre válido.";
+    errors.name = "Ingresa un nombre valido.";
   }
 
   const isValidUsername =
@@ -181,18 +186,6 @@ export function validateAdminUserPasswordResetPayload(
   return errors;
 }
 
-export function serializeAdminUser(user: AdminUserRecord): AdminUserApiRecord {
-  return {
-    id: user.id,
-    name: user.name,
-    username: user.username ?? user.email ?? user.name,
-    email: user.email,
-    role: user.role,
-    createdAt: user.createdAt.toISOString(),
-    updatedAt: user.updatedAt.toISOString(),
-  };
-}
-
 export function getAdminDisplayName(user: {
   name?: string | null;
   username?: string | null;
@@ -217,137 +210,4 @@ export function getAdminUsername(user: {
     user.name?.trim() ||
     "usuario"
   );
-}
-
-export async function ensureBootstrapSuperadmin() {
-  const username = normalizeAdminUsername(
-    process.env.AUTH_ADMIN_USER ??
-      process.env.AUTH_ADMIN_USERNAME ??
-      process.env.AUTH_ADMIN_EMAIL
-  );
-  const legacyEmail = normalizeAdminEmail(process.env.AUTH_ADMIN_EMAIL);
-  const password =
-    typeof process.env.AUTH_ADMIN_PASSWORD === "string"
-      ? process.env.AUTH_ADMIN_PASSWORD
-      : "";
-
-  if (!username || password.trim().length < 8) {
-    return null;
-  }
-
-  const prisma = getPrismaClient();
-  const lookupConditions: Prisma.AdminUserWhereInput[] = [
-    {
-      username,
-    },
-  ];
-
-  if (legacyEmail) {
-    lookupConditions.push({
-      email: legacyEmail,
-    });
-  }
-
-  let existingUser = await prisma.adminUser.findFirst({
-    where: {
-      OR: lookupConditions,
-    },
-    select: bootstrapAdminUserSelect,
-  });
-  const superadminCount = await prisma.adminUser.count({
-    where: {
-      role: "SUPERADMIN",
-    },
-  });
-
-  if (!existingUser && superadminCount === 1) {
-    existingUser = await prisma.adminUser.findFirst({
-      where: {
-        role: "SUPERADMIN",
-      },
-      select: bootstrapAdminUserSelect,
-    });
-  }
-
-  if (existingUser) {
-    if (existingUser.role !== "SUPERADMIN" && superadminCount > 0) {
-      return null;
-    }
-
-    const passwordMatches = await verifyPassword(
-      password,
-      existingUser.passwordHash
-    );
-
-    return prisma.adminUser.update({
-      where: {
-        id: existingUser.id,
-      },
-      data: {
-        name: existingUser.name || "Superadmin",
-        username,
-        email: null,
-        passwordHash: passwordMatches
-          ? existingUser.passwordHash
-          : await hashPassword(password),
-        role: "SUPERADMIN",
-      },
-      select: adminUserSelect,
-    });
-  }
-
-  if (superadminCount > 0) {
-    return null;
-  }
-
-  const passwordHash = await hashPassword(password);
-
-  return prisma.adminUser.create({
-    data: {
-      name: "Superadmin",
-      username,
-      email: null,
-      passwordHash,
-      role: "SUPERADMIN",
-    },
-    select: adminUserSelect,
-  });
-}
-
-export async function getAdminUsers(): Promise<AdminUserRecord[]> {
-  const users = await getPrismaClient().adminUser.findMany({
-    select: adminUserSelect,
-    orderBy: [{ role: "asc" }, { name: "asc" }, { createdAt: "asc" }],
-  });
-
-  return users.sort((left, right) => {
-    if (left.role === right.role) {
-      return left.name.localeCompare(right.name, "es");
-    }
-
-    return left.role === "SUPERADMIN" ? -1 : 1;
-  });
-}
-
-export async function getAdminUsersSummary(): Promise<AdminUsersSummary> {
-  const prisma = getPrismaClient();
-  const [totalUsers, superadminCount, gestorCount] = await Promise.all([
-    prisma.adminUser.count(),
-    prisma.adminUser.count({
-      where: {
-        role: "SUPERADMIN",
-      },
-    }),
-    prisma.adminUser.count({
-      where: {
-        role: "GESTOR",
-      },
-    }),
-  ]);
-
-  return {
-    totalUsers,
-    superadminCount,
-    gestorCount,
-  };
 }

@@ -1,13 +1,14 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import type {
+  AdminUserApiRecord,
   AdminUserFieldErrors,
   AdminUserItemResponse,
 } from "@/lib/admin-users";
+import { createAdminUser } from "@/lib/supabase-data";
 
 const inputClassName =
   "h-12 w-full rounded-2xl border border-zinc-200 bg-white px-4 text-sm text-zinc-950 outline-none transition focus:border-zinc-400 focus:ring-4 focus:ring-zinc-200/60";
@@ -24,8 +25,11 @@ const initialValues: UserFormValues = {
   password: "",
 };
 
-export function UserForm() {
-  const router = useRouter();
+type UserFormProps = {
+  onSuccess?: (user: AdminUserApiRecord) => void;
+};
+
+export function UserForm({ onSuccess }: UserFormProps) {
   const [values, setValues] = useState<UserFormValues>(initialValues);
   const [fieldErrors, setFieldErrors] = useState<AdminUserFieldErrors>({});
   const [errorMessage, setErrorMessage] = useState("");
@@ -55,19 +59,9 @@ export function UserForm() {
     setSuccessMessage("");
 
     try {
-      const response = await fetch("/api/admin/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
+      const result = (await createAdminUser(values)) as AdminUserItemResponse;
 
-      const result = (await response
-        .json()
-        .catch(() => null)) as AdminUserItemResponse | null;
-
-      if (!response.ok || !result || !result.success) {
+      if (!result || !result.success) {
         setFieldErrors(result && !result.success ? result.fieldErrors ?? {} : {});
         setErrorMessage(
           result?.message ??
@@ -78,7 +72,7 @@ export function UserForm() {
 
       setValues(initialValues);
       setSuccessMessage("Usuario gestor creado correctamente.");
-      router.refresh();
+      onSuccess?.(result.user);
     } catch {
       setErrorMessage(
         "No pudimos crear el usuario gestor en este momento."

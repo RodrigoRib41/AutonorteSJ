@@ -1,9 +1,12 @@
+"use client";
+
 import Link from "next/link";
-import { ArchiveRestore, Clock3, History, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ArchiveRestore, Clock3, History, Loader2, Trash2 } from "lucide-react";
 
 import { RestoreVehicleButton } from "@/components/admin/restore-vehicle-button";
 import { Button } from "@/components/ui/button";
-import { requireAdminPageAccess, vehicleManagerRoles } from "@/lib/admin-auth";
+import { fetchActiveVehicleRestorePoints } from "@/lib/supabase-data";
 import {
   formatKilometraje,
   formatPrecio,
@@ -11,45 +14,85 @@ import {
   getVehicleConditionLabel,
 } from "@/lib/vehicle-records";
 import {
-  getActiveVehicleRestorePoints,
   getVehicleRestoreActionDescription,
   getVehicleRestoreActionLabel,
   getVehicleRestoreActorLabel,
   parseVehicleRestoreSnapshot,
-  purgeExpiredVehicleRestorePoints,
   type VehicleRestorePointRecord,
   VEHICLE_RESTORE_RETENTION_DAYS,
 } from "@/lib/vehicle-restore-points";
 
-export const dynamic = "force-dynamic";
-
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-function formatDate(value: Date) {
+function formatDate(value: string) {
   return new Intl.DateTimeFormat("es-AR", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(value);
+  }).format(new Date(value));
 }
 
-function getDaysUntilExpiry(expiresAt: Date, now: Date) {
-  return Math.max(0, Math.ceil((expiresAt.getTime() - now.getTime()) / DAY_MS));
+function getDaysUntilExpiry(expiresAt: string, now: Date) {
+  return Math.max(
+    0,
+    Math.ceil((new Date(expiresAt).getTime() - now.getTime()) / DAY_MS)
+  );
 }
 
-export default async function AdminTrashPage() {
-  await requireAdminPageAccess(vehicleManagerRoles);
-
+export default function AdminTrashPage() {
+  const [restorePoints, setRestorePoints] = useState<VehicleRestorePointRecord[]>(
+    []
+  );
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
   const now = new Date();
-  await purgeExpiredVehicleRestorePoints(now);
 
-  const restorePoints: VehicleRestorePointRecord[] =
-    await getActiveVehicleRestorePoints(now);
-  const deletedCount = restorePoints.filter(
-    (point) => point.action === "DELETE"
-  ).length;
-  const updateCount = restorePoints.filter(
-    (point) => point.action === "UPDATE"
-  ).length;
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadRestorePoints() {
+      setIsLoading(true);
+      setErrorMessage("");
+
+      try {
+        const nextRestorePoints = await fetchActiveVehicleRestorePoints();
+
+        if (!isMounted) {
+          return;
+        }
+
+        setRestorePoints(nextRestorePoints);
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : "No pudimos cargar la papelera."
+        );
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    void loadRestorePoints();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const deletedCount = useMemo(
+    () => restorePoints.filter((point) => point.action === "DELETE").length,
+    [restorePoints]
+  );
+  const updateCount = useMemo(
+    () => restorePoints.filter((point) => point.action === "UPDATE").length,
+    [restorePoints]
+  );
 
   return (
     <div className="space-y-8">
@@ -124,7 +167,21 @@ export default async function AdminTrashPage() {
         </article>
       </section>
 
-      {restorePoints.length === 0 ? (
+      {isLoading ? (
+        <section className="rounded-[2rem] border border-zinc-200 bg-white p-10 text-center shadow-[0_24px_60px_rgba(24,24,27,0.06)]">
+          <div className="inline-flex items-center gap-3 rounded-full border border-zinc-200 bg-zinc-50 px-5 py-3 text-sm text-zinc-600">
+            <Loader2 className="size-4 animate-spin" />
+            Cargando papelera...
+          </div>
+        </section>
+      ) : errorMessage ? (
+        <section className="rounded-[2rem] border border-red-200 bg-red-50 p-8 text-red-700 shadow-[0_24px_60px_rgba(24,24,27,0.06)]">
+          <h3 className="text-xl font-semibold text-red-900">
+            No pudimos cargar la papelera
+          </h3>
+          <p className="mt-3 text-sm leading-7">{errorMessage}</p>
+        </section>
+      ) : restorePoints.length === 0 ? (
         <section className="rounded-[2rem] border border-dashed border-zinc-300 bg-zinc-50 p-10 text-center">
           <div className="mx-auto flex max-w-xl flex-col items-center">
             <div className="rounded-3xl bg-white p-4 text-zinc-950 shadow-sm">
@@ -140,14 +197,16 @@ export default async function AdminTrashPage() {
         </section>
       ) : (
         <section className="space-y-4">
-          {restorePoints.map((point: VehicleRestorePointRecord) => {
-            const snapshot = parseVehicleRestoreSnapshot(point.snapshot);
-            const snapshotVehicle = snapshot?.vehicle;
-            const daysUntilExpiry = getDaysUntilExpiry(point.expiresAt, now);
-            const canRestore = point.action === "DELETE" || !point.vehicle.deletedAt;
+            {restorePoints.map((point: VehicleRestorePointRecord) => {
+              const snapshot = parseVehicleRestoreSnapshot(point.snapshot);
+              const snapshotVehicle = snapshot?.vehicle;
+              const daysUntilExpiry = getDaysUntilExpiry(point.expiresAt, now);
+              const canRestore =
+                point.action === "DELETE" ||
+                (point.vehicle ? !point.vehicle.deletedAt : false);
 
-            return (
-              <article
+              return (
+                <article
                 key={point.id}
                 className="rounded-[1.75rem] border border-zinc-200 bg-white p-6 shadow-[0_20px_50px_rgba(24,24,27,0.05)] sm:p-7"
               >
@@ -252,6 +311,11 @@ export default async function AdminTrashPage() {
                         restorePointId={point.id}
                         action={point.action}
                         vehicleLabel={point.vehicleLabel}
+                        onRestored={(restoredPointId) => {
+                          setRestorePoints((current) =>
+                            current.filter((currentPoint) => currentPoint.id !== restoredPointId)
+                          );
+                        }}
                       />
                     ) : (
                       <div className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm leading-6 text-zinc-600">

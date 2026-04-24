@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import type { AdminRoleValue } from "@/lib/admin-role-utils";
 
 export const MAX_VEHICLE_IMAGES = 5;
 export const MAX_FEATURED_VEHICLES = 3;
@@ -18,51 +18,55 @@ export const vehicleCategories = [
 export type VehicleCurrency = (typeof vehicleCurrencies)[number];
 export type VehicleCondition = (typeof vehicleConditions)[number];
 export type VehicleCategory = (typeof vehicleCategories)[number];
+export type VehicleAuditAction = "CREATE" | "UPDATE" | "DELETE" | "RESTORE";
+export type VehicleRestoreAction = "UPDATE" | "DELETE";
 
-export const vehicleCategoryOptions: Array<{
-  label: string;
-  value: VehicleCategory;
-}> = [
-  { value: "CAR", label: "Auto" },
-  { value: "PICKUP", label: "Pick-up" },
-  { value: "SUV", label: "SUV" },
-  { value: "MOTORCYCLE", label: "Moto" },
-  { value: "VAN", label: "Utilitario" },
-  { value: "TRUCK", label: "Camion" },
-  { value: "OTHER", label: "Otro" },
-];
+export type VehicleActor = {
+  id: string;
+  name: string;
+  username: string | null;
+  email: string | null;
+  role: AdminRoleValue;
+};
 
-export const vehicleWithImagesInclude = {
-  images: {
-    orderBy: {
-      sortOrder: "asc",
-    },
-  },
-  createdBy: {
-    select: {
-      id: true,
-      name: true,
-      username: true,
-      email: true,
-      role: true,
-    },
-  },
-  updatedBy: {
-    select: {
-      id: true,
-      name: true,
-      username: true,
-      email: true,
-      role: true,
-    },
-  },
-} satisfies Prisma.VehicleInclude;
+export type VehicleImagePersisted = {
+  id: string;
+  vehicleId: string;
+  publicId: string;
+  assetId: string | null;
+  alt: string | null;
+  sortOrder: number;
+  isPrimary: boolean;
+  width: number | null;
+  height: number | null;
+  format: string | null;
+  bytes: number | null;
+  createdAt: Date | string;
+};
 
-export type VehiclePersisted = Prisma.VehicleGetPayload<{
-  include: typeof vehicleWithImagesInclude;
-}>;
-
-export type VehicleImagePersisted = VehiclePersisted["images"][number];
+export type VehiclePersisted = {
+  id: string;
+  marca: string;
+  modelo: string;
+  condition: VehicleCondition;
+  category: VehicleCategory;
+  anio: number;
+  kilometraje: number;
+  precio: number;
+  promotionalPrice: number | null;
+  currency: VehicleCurrency;
+  descripcion: string | null;
+  destacado: boolean;
+  createdByUserId: string | null;
+  updatedByUserId: string | null;
+  deletedByUserId: string | null;
+  deletedAt: Date | string | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  images: VehicleImagePersisted[];
+  createdBy?: VehicleActor | null;
+  updatedBy?: VehicleActor | null;
+};
 
 export type VehiclePayload = {
   marca: string;
@@ -243,6 +247,19 @@ export const emptyVehicleFormValues: VehicleFormValues = {
   destacado: false,
 };
 
+export const vehicleCategoryOptions: Array<{
+  label: string;
+  value: VehicleCategory;
+}> = [
+  { value: "CAR", label: "Auto" },
+  { value: "PICKUP", label: "Pick-up" },
+  { value: "SUV", label: "SUV" },
+  { value: "MOTORCYCLE", label: "Moto" },
+  { value: "VAN", label: "Utilitario" },
+  { value: "TRUCK", label: "Camion" },
+  { value: "OTHER", label: "Otro" },
+];
+
 function asString(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -366,7 +383,7 @@ export function validateVehiclePayload(
     payload.anio < 1900 ||
     payload.anio > currentYear
   ) {
-    errors.anio = "Ingresa un año válido.";
+    errors.anio = "Ingresa un ano valido.";
   }
 
   if (!Number.isInteger(payload.kilometraje) || payload.kilometraje < 0) {

@@ -1,0 +1,13 @@
+project_id = "autonortesj"
+
+[functions.admin-users]
+verify_jwt = true
+
+[functions.admin-vehicles]
+verify_jwt = true
+
+[functions.vehicle-images]
+verify_jwt = true
+
+[functions.vehicle-restore-points]
+verify_jwt = true

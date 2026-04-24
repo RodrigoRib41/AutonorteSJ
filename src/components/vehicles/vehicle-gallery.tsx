@@ -2,6 +2,7 @@
 
 import { RotateCcw, X, ZoomIn, ZoomOut } from "lucide-react";
 import {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -57,68 +58,74 @@ export function VehicleGallery({ vehicleName, images }: VehicleGalleryProps) {
   const activeImage =
     images.find((image) => image.id === activeImageId) ?? images[0] ?? null;
 
-  function getLightboxBounds(nextZoom = lightboxZoom) {
-    const imageElement = lightboxImageRef.current;
-    const stageElement = lightboxStageRef.current;
+  const getLightboxBounds = useCallback(
+    (nextZoom = lightboxZoom) => {
+      const imageElement = lightboxImageRef.current;
+      const stageElement = lightboxStageRef.current;
 
-    if (!imageElement || !stageElement) {
-      return { maxX: 0, maxY: 0 };
-    }
+      if (!imageElement || !stageElement) {
+        return { maxX: 0, maxY: 0 };
+      }
 
-    const stageRect = stageElement.getBoundingClientRect();
-    const scaledWidth = imageElement.offsetWidth * nextZoom;
-    const scaledHeight = imageElement.offsetHeight * nextZoom;
+      const stageRect = stageElement.getBoundingClientRect();
+      const scaledWidth = imageElement.offsetWidth * nextZoom;
+      const scaledHeight = imageElement.offsetHeight * nextZoom;
 
-    return {
-      maxX: Math.max(0, (scaledWidth - stageRect.width) / 2),
-      maxY: Math.max(0, (scaledHeight - stageRect.height) / 2),
-    };
-  }
+      return {
+        maxX: Math.max(0, (scaledWidth - stageRect.width) / 2),
+        maxY: Math.max(0, (scaledHeight - stageRect.height) / 2),
+      };
+    },
+    [lightboxZoom]
+  );
 
-  function clampLightboxOffset(
-    nextOffset: LightboxOffset,
-    nextZoom = lightboxZoom
-  ) {
-    const { maxX, maxY } = getLightboxBounds(nextZoom);
+  const clampLightboxOffset = useCallback(
+    (nextOffset: LightboxOffset, nextZoom = lightboxZoom) => {
+      const { maxX, maxY } = getLightboxBounds(nextZoom);
 
-    return {
-      x: Math.min(maxX, Math.max(-maxX, nextOffset.x)),
-      y: Math.min(maxY, Math.max(-maxY, nextOffset.y)),
-    };
-  }
+      return {
+        x: Math.min(maxX, Math.max(-maxX, nextOffset.x)),
+        y: Math.min(maxY, Math.max(-maxY, nextOffset.y)),
+      };
+    },
+    [getLightboxBounds, lightboxZoom]
+  );
 
-  function resetLightboxView() {
+  const resetLightboxView = useCallback(() => {
     lightboxDragStateRef.current = null;
     setIsDraggingLightbox(false);
     setLightboxOffset(DEFAULT_LIGHTBOX_OFFSET);
     setLightboxZoom(LIGHTBOX_MIN_ZOOM);
-  }
+  }, []);
 
-  function openLightbox() {
+  const openLightbox = useCallback(() => {
     setIsLightboxOpen(true);
     resetLightboxView();
-  }
+  }, [resetLightboxView]);
 
-  function closeLightbox() {
+  const closeLightbox = useCallback(() => {
     setIsLightboxOpen(false);
     resetLightboxView();
-  }
+  }, [resetLightboxView]);
 
-  function updateLightboxZoom(nextZoom: number) {
-    const safeZoom = clampLightboxZoom(nextZoom);
+  const updateLightboxZoom = useCallback(
+    (nextZoom: number) => {
+      const safeZoom = clampLightboxZoom(nextZoom);
 
-    setLightboxZoom(safeZoom);
-    setLightboxOffset((currentOffset) =>
-      safeZoom === LIGHTBOX_MIN_ZOOM
-        ? DEFAULT_LIGHTBOX_OFFSET
-        : clampLightboxOffset(currentOffset, safeZoom)
-    );
+      setLightboxZoom(safeZoom);
+      setLightboxOffset((currentOffset) =>
+        safeZoom === LIGHTBOX_MIN_ZOOM
+          ? DEFAULT_LIGHTBOX_OFFSET
+          : clampLightboxOffset(currentOffset, safeZoom)
+      );
 
-    if (safeZoom === LIGHTBOX_MIN_ZOOM) {
-      lightboxDragStateRef.current = null;
-      setIsDraggingLightbox(false);
-    }
-  }
+      if (safeZoom === LIGHTBOX_MIN_ZOOM) {
+        lightboxDragStateRef.current = null;
+        setIsDraggingLightbox(false);
+      }
+    },
+    [clampLightboxOffset]
+  );
 
   function handleLightboxPointerDown(
     event: ReactPointerEvent<HTMLDivElement>
@@ -206,7 +213,13 @@ export function VehicleGallery({ vehicleName, images }: VehicleGalleryProps) {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isLightboxOpen, lightboxZoom]);
+  }, [
+    closeLightbox,
+    isLightboxOpen,
+    lightboxZoom,
+    resetLightboxView,
+    updateLightboxZoom,
+  ]);
 
   useEffect(() => {
     if (!isLightboxOpen) {
@@ -214,7 +227,7 @@ export function VehicleGallery({ vehicleName, images }: VehicleGalleryProps) {
     }
 
     resetLightboxView();
-  }, [activeImageId, isLightboxOpen]);
+  }, [activeImageId, isLightboxOpen, resetLightboxView]);
 
   useEffect(() => {
     if (!isLightboxOpen) {
@@ -233,7 +246,7 @@ export function VehicleGallery({ vehicleName, images }: VehicleGalleryProps) {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [isLightboxOpen, lightboxZoom]);
+  }, [clampLightboxOffset, isLightboxOpen, lightboxZoom]);
 
   if (!activeImage) {
     return (

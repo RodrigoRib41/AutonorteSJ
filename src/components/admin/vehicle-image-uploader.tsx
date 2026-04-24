@@ -1,6 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -13,11 +13,17 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { CloudinaryVehicleImage } from "@/components/vehicles/cloudinary-vehicle-image";
+import { uploadVehicleImageFromBrowser } from "@/lib/cloudinary-browser";
 import {
   VEHICLE_IMAGE_ACCEPT,
   VEHICLE_IMAGE_MAX_FILE_SIZE_BYTES,
   validateVehicleImageFile,
 } from "@/lib/cloudinary-images";
+import {
+  deleteVehicleImages,
+  registerUploadedVehicleImages,
+  reorderVehicleImages,
+} from "@/lib/supabase-data";
 import {
   MAX_VEHICLE_IMAGES,
   type VehicleImageApiRecord,
@@ -241,23 +247,28 @@ export function VehicleImageUploader({
     setSuccessMessage("");
 
     try {
-      const formData = new FormData();
-      formData.append("vehicleId", vehicleId);
+      const uploadedAssets = await Promise.all(
+        selectedFiles.map((file) =>
+          uploadVehicleImageFromBrowser({
+            file,
+            vehicleId,
+          })
+        )
+      );
+      const result = (await registerUploadedVehicleImages({
+        vehicleId,
+        images: uploadedAssets.map((asset) => ({
+          assetId: asset.asset_id,
+          publicId: asset.public_id,
+          alt: null,
+          width: asset.width,
+          height: asset.height,
+          format: asset.format,
+          bytes: asset.bytes,
+        })),
+      })) as VehicleImagesResponse;
 
-      selectedFiles.forEach((file) => {
-        formData.append("files", file);
-      });
-
-      const response = await fetch("/api/admin/vehicle-images", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = (await response
-        .json()
-        .catch(() => null)) as VehicleImagesResponse | null;
-
-      if (!response.ok || !result || !result.success) {
+      if (!result || !result.success) {
         setErrorMessage(
           result?.message ??
             "No pudimos subir las imagenes en este momento. Intenta nuevamente."
@@ -311,22 +322,12 @@ export function VehicleImageUploader({
     setSuccessMessage("");
 
     try {
-      const response = await fetch("/api/admin/vehicle-images", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          vehicleId,
-          imageIds: uniqueImageIds,
-        }),
-      });
+      const result = (await deleteVehicleImages({
+        vehicleId,
+        imageIds: uniqueImageIds,
+      })) as VehicleImageDeleteResponse;
 
-      const result = (await response
-        .json()
-        .catch(() => null)) as VehicleImageDeleteResponse | null;
-
-      if (!response.ok || !result || !result.success) {
+      if (!result || !result.success) {
         setErrorMessage(
           result?.message ??
             "No pudimos eliminar la imagen en este momento. Intenta nuevamente."
@@ -364,22 +365,12 @@ export function VehicleImageUploader({
     setSuccessMessage("");
 
     try {
-      const response = await fetch("/api/admin/vehicle-images", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          vehicleId,
-          orderedImageIds: nextImages.map((image) => image.id),
-        }),
-      });
+      const result = (await reorderVehicleImages({
+        vehicleId,
+        orderedImageIds: nextImages.map((image) => image.id),
+      })) as VehicleImagesResponse;
 
-      const result = (await response
-        .json()
-        .catch(() => null)) as VehicleImagesResponse | null;
-
-      if (!response.ok || !result || !result.success) {
+      if (!result || !result.success) {
         throw new Error(
           result?.message ??
             "No pudimos actualizar el orden de las imagenes en este momento."
@@ -693,13 +684,10 @@ export function VehicleImageUploader({
                     }`}
                   >
                     <div className="relative aspect-[4/3] bg-zinc-100">
-                      <Image
+                      <img
                         src={item.preview.url}
                         alt={item.preview.name}
-                        fill
-                        unoptimized
-                        sizes="(min-width: 1280px) 20vw, (min-width: 640px) 40vw, 100vw"
-                        className="object-cover"
+                        className="absolute inset-0 h-full w-full object-cover"
                       />
                       <div className="absolute left-4 top-4 inline-flex rounded-full bg-white/92 px-3 py-1 text-xs font-semibold tracking-[0.18em] text-zinc-700 uppercase shadow-sm">
                         {index === 0 ? "Principal al subir" : `Pendiente ${index + 1}`}

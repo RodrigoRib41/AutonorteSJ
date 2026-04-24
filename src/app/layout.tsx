@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 
 import { WhatsAppButton } from "@/components/common/whatsapp-button";
+import { AuthProvider } from "@/components/providers/auth-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,8 +30,10 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${geistSans.variable} scroll-smooth`}>
       <body className="min-h-screen bg-background text-foreground antialiased">
-        {children}
-        <WhatsAppButton />
+        <AuthProvider>
+          {children}
+          <WhatsAppButton />
+        </AuthProvider>
       </body>
     </html>
   );

@@ -4,8 +4,6 @@ import { Hero } from "@/components/home/hero";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 
-export const dynamic = "force-dynamic";
-
 export default function HomePage() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-background text-foreground">

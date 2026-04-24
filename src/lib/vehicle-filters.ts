@@ -1,12 +1,13 @@
-import type { Prisma } from "@prisma/client";
-
 import {
+  getVehicleDisplayPrice,
+  hasVehiclePromotion,
   vehicleCategories,
   vehicleConditions,
   vehicleCurrencies,
   type VehicleCategory,
   type VehicleCondition,
   type VehicleCurrency,
+  type VehiclePreview,
 } from "@/lib/vehicle-records";
 
 export type VehicleSearchParams = Record<
@@ -45,10 +46,10 @@ export const vehicleSortOptions: Array<{
   label: string;
   value: VehicleSortOption;
 }> = [
-  { value: "updated-desc", label: "Más recientes" },
+  { value: "updated-desc", label: "Mas recientes" },
   { value: "price-asc", label: "Precio: menor a mayor" },
   { value: "price-desc", label: "Precio: mayor a menor" },
-  { value: "year-desc", label: "Año: más nuevos primero" },
+  { value: "year-desc", label: "Ano: mas nuevos primero" },
   { value: "kilometraje-asc", label: "Kilometraje: menor a mayor" },
 ];
 
@@ -142,23 +143,6 @@ function normalizeSort(value: string | string[] | undefined): VehicleSortOption 
   return defaultVehicleSort;
 }
 
-function parseInteger(value: string) {
-  if (!value) {
-    return null;
-  }
-
-  const parsed = Number.parseInt(value, 10);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-function normalizeRange(min: number | null, max: number | null) {
-  if (min !== null && max !== null && min > max) {
-    return [max, min] as const;
-  }
-
-  return [min, max] as const;
-}
-
 export function parseVehicleFilters(
   searchParams?: VehicleSearchParams
 ): VehicleFilterValues {
@@ -181,133 +165,6 @@ export function parseVehicleFilters(
     hasPromotion: normalizeBooleanFilter(searchParams.hasPromotion),
     sort: normalizeSort(searchParams.sort),
   };
-}
-
-export function getVehicleWhereInput(
-  filters: VehicleFilterValues
-): Prisma.VehicleWhereInput {
-  const where: Prisma.VehicleWhereInput = {
-    deletedAt: null,
-  };
-  const [anioMin, anioMax] = normalizeRange(
-    parseInteger(filters.anioMin),
-    parseInteger(filters.anioMax)
-  );
-  const [kilometrajeMin, kilometrajeMax] = normalizeRange(
-    parseInteger(filters.kilometrajeMin),
-    parseInteger(filters.kilometrajeMax)
-  );
-
-  if (filters.q) {
-    const queryAsYear = parseInteger(filters.q);
-
-    where.OR = [
-      {
-        marca: {
-          contains: filters.q,
-          mode: "insensitive",
-        },
-      },
-      {
-        modelo: {
-          contains: filters.q,
-          mode: "insensitive",
-        },
-      },
-      {
-        descripcion: {
-          contains: filters.q,
-          mode: "insensitive",
-        },
-      },
-      ...(queryAsYear !== null && String(queryAsYear).length === 4
-        ? [{ anio: queryAsYear }]
-        : []),
-    ];
-  }
-
-  if (filters.marca) {
-    where.marca = {
-      equals: filters.marca,
-      mode: "insensitive",
-    };
-  }
-
-  if (filters.condition) {
-    where.condition = filters.condition;
-  }
-
-  if (filters.category) {
-    where.category = filters.category;
-  }
-
-  if (filters.currency) {
-    where.currency = filters.currency;
-  }
-
-  if (anioMin !== null || anioMax !== null) {
-    where.anio = {
-      ...(anioMin !== null ? { gte: anioMin } : {}),
-      ...(anioMax !== null ? { lte: anioMax } : {}),
-    };
-  }
-
-  if (kilometrajeMin !== null || kilometrajeMax !== null) {
-    where.kilometraje = {
-      ...(kilometrajeMin !== null ? { gte: kilometrajeMin } : {}),
-      ...(kilometrajeMax !== null ? { lte: kilometrajeMax } : {}),
-    };
-  }
-
-  if (filters.destacado === "true") {
-    where.destacado = true;
-  }
-
-  if (filters.destacado === "false") {
-    where.destacado = false;
-  }
-
-  if (filters.hasImages === "true") {
-    where.images = {
-      some: {},
-    };
-  }
-
-  if (filters.hasImages === "false") {
-    where.images = {
-      none: {},
-    };
-  }
-
-  if (filters.hasPromotion === "true") {
-    where.promotionalPrice = {
-      not: null,
-    };
-  }
-
-  if (filters.hasPromotion === "false") {
-    where.promotionalPrice = null;
-  }
-
-  return where;
-}
-
-export function getVehicleOrderBy(
-  sort: VehicleSortOption
-): Prisma.VehicleOrderByWithRelationInput[] {
-  switch (sort) {
-    case "price-asc":
-      return [{ precio: "asc" }, { updatedAt: "desc" }, { id: "asc" }];
-    case "price-desc":
-      return [{ precio: "desc" }, { updatedAt: "desc" }, { id: "asc" }];
-    case "year-desc":
-      return [{ anio: "desc" }, { updatedAt: "desc" }, { id: "asc" }];
-    case "kilometraje-asc":
-      return [{ kilometraje: "asc" }, { updatedAt: "desc" }, { id: "asc" }];
-    case "updated-desc":
-    default:
-      return [{ destacado: "desc" }, { updatedAt: "desc" }, { id: "asc" }];
-  }
 }
 
 export function countActiveVehicleFilters(
@@ -341,4 +198,163 @@ export function hasActiveVehicleFilters(
   options?: { includeAdminFields?: boolean }
 ) {
   return countActiveVehicleFilters(filters, options) > 0;
+}
+
+export type VehicleFilterableRecord = Pick<
+  VehiclePreview,
+  | "marca"
+  | "modelo"
+  | "condition"
+  | "category"
+  | "anio"
+  | "kilometraje"
+  | "precio"
+  | "promotionalPrice"
+  | "currency"
+  | "descripcion"
+  | "destacado"
+  | "images"
+> & {
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+};
+
+function toTimestamp(value: string | Date | undefined) {
+  if (!value) {
+    return 0;
+  }
+
+  const date = value instanceof Date ? value : new Date(value);
+  const timestamp = date.getTime();
+
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function matchesBooleanFilter(
+  filter: VehicleBooleanFilter,
+  value: boolean
+) {
+  if (!filter) {
+    return true;
+  }
+
+  return filter === "true" ? value : !value;
+}
+
+export function matchesVehicleFilters(
+  vehicle: VehicleFilterableRecord,
+  filters: VehicleFilterValues,
+  options?: { includeAdminFields?: boolean }
+) {
+  const normalizedQuery = filters.q.trim().toLowerCase();
+
+  if (normalizedQuery) {
+    const searchValue = [
+      vehicle.marca,
+      vehicle.modelo,
+      String(vehicle.anio),
+      vehicle.descripcion ?? "",
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    if (!searchValue.includes(normalizedQuery)) {
+      return false;
+    }
+  }
+
+  if (
+    filters.marca &&
+    vehicle.marca.trim().toLowerCase() !== filters.marca.trim().toLowerCase()
+  ) {
+    return false;
+  }
+
+  if (filters.condition && vehicle.condition !== filters.condition) {
+    return false;
+  }
+
+  if (filters.category && vehicle.category !== filters.category) {
+    return false;
+  }
+
+  if (filters.currency && vehicle.currency !== filters.currency) {
+    return false;
+  }
+
+  if (filters.anioMin && vehicle.anio < Number(filters.anioMin)) {
+    return false;
+  }
+
+  if (filters.anioMax && vehicle.anio > Number(filters.anioMax)) {
+    return false;
+  }
+
+  if (
+    filters.kilometrajeMin &&
+    vehicle.kilometraje < Number(filters.kilometrajeMin)
+  ) {
+    return false;
+  }
+
+  if (
+    filters.kilometrajeMax &&
+    vehicle.kilometraje > Number(filters.kilometrajeMax)
+  ) {
+    return false;
+  }
+
+  if (
+    !matchesBooleanFilter(filters.hasPromotion, hasVehiclePromotion(vehicle))
+  ) {
+    return false;
+  }
+
+  if (options?.includeAdminFields) {
+    if (!matchesBooleanFilter(filters.destacado, vehicle.destacado)) {
+      return false;
+    }
+
+    if (
+      !matchesBooleanFilter(filters.hasImages, vehicle.images.length > 0)
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export function sortVehicleRecords<T extends VehicleFilterableRecord>(
+  vehicles: T[],
+  sort: VehicleSortOption = defaultVehicleSort
+) {
+  return [...vehicles].sort((left, right) => {
+    switch (sort) {
+      case "price-asc":
+        return (
+          getVehicleDisplayPrice(left) - getVehicleDisplayPrice(right) ||
+          right.anio - left.anio
+        );
+      case "price-desc":
+        return (
+          getVehicleDisplayPrice(right) - getVehicleDisplayPrice(left) ||
+          right.anio - left.anio
+        );
+      case "year-desc":
+        return right.anio - left.anio || right.kilometraje - left.kilometraje;
+      case "kilometraje-asc":
+        return (
+          left.kilometraje - right.kilometraje ||
+          right.anio - left.anio
+        );
+      case "updated-desc":
+      default:
+        return (
+          toTimestamp(right.updatedAt ?? right.createdAt) -
+            toTimestamp(left.updatedAt ?? left.createdAt) ||
+          right.anio - left.anio
+        );
+    }
+  });
 }

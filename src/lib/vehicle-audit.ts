@@ -1,31 +1,28 @@
-import { type Prisma, type VehicleAuditAction } from "@prisma/client";
-
 import type { AuthenticatedAdmin } from "@/lib/admin-auth";
+import type { VehicleAuditAction } from "@/lib/vehicle-records";
 
-export const vehicleAuditActorSelect = {
-  id: true,
-  name: true,
-  username: true,
-  email: true,
-  role: true,
-} satisfies Prisma.AdminUserSelect;
-
-export const vehicleAuditLogInclude = {
-  actor: {
-    select: vehicleAuditActorSelect,
-  },
-} satisfies Prisma.VehicleAuditLogInclude;
-
-export type VehicleAuditLogRecord = Prisma.VehicleAuditLogGetPayload<{
-  include: typeof vehicleAuditLogInclude;
-}>;
+export type VehicleAuditLogRecord = {
+  id: string;
+  vehicleId: string;
+  vehicleLabel: string;
+  action: VehicleAuditAction;
+  actorUserId: string | null;
+  actorName: string | null;
+  actorEmail: string | null;
+  actor?: {
+    name?: string | null;
+    username?: string | null;
+    email?: string | null;
+  } | null;
+  createdAt: string;
+};
 
 export function getVehicleAuditActionLabel(action: VehicleAuditAction) {
   switch (action) {
     case "CREATE":
       return "Alta";
     case "UPDATE":
-      return "Edición";
+      return "Edicion";
     case "DELETE":
       return "Baja";
     case "RESTORE":
@@ -38,15 +35,15 @@ export function getVehicleAuditActionLabel(action: VehicleAuditAction) {
 export function getVehicleAuditActionSentence(action: VehicleAuditAction) {
   switch (action) {
     case "CREATE":
-      return "creó";
+      return "creo";
     case "UPDATE":
-      return "actualizó";
+      return "actualizo";
     case "DELETE":
-      return "eliminó";
+      return "elimino";
     case "RESTORE":
-      return "restauró";
+      return "restauro";
     default:
-      return "gestionó";
+      return "gestiono";
   }
 }
 
@@ -79,11 +76,11 @@ export function buildVehicleAuditLogData(
   }
 ) {
   return {
-    vehicleId: vehicle.id,
-    vehicleLabel: `${vehicle.marca} ${vehicle.modelo}`.trim(),
+    vehicle_id: vehicle.id,
+    vehicle_label: `${vehicle.marca} ${vehicle.modelo}`.trim(),
     action,
-    actorUserId: admin.id,
-    actorName: admin.name,
-    actorEmail: admin.username,
+    actor_user_id: admin.id,
+    actor_name: admin.name,
+    actor_email: admin.username,
   };
 }

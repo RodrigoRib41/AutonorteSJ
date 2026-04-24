@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   CarFront,
   FileText,
@@ -10,68 +13,78 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/components/providers/auth-provider";
 import { getAdminRoleLabel } from "@/lib/admin-users";
-import { requireAdminPageAccess } from "@/lib/admin-auth";
 import {
-  getRecentVehicleAuditLogs,
-  getVehicleCount,
-} from "@/lib/vehicle-queries";
-import { getPrismaClient } from "@/lib/prisma";
+  fetchActiveVehicleRestorePointCount,
+  fetchAdminUsersSummary,
+  fetchAdminVehicles,
+  fetchRecentVehicleAuditLogs,
+} from "@/lib/supabase-data";
 import {
   getVehicleAuditActionLabel,
   getVehicleAuditActionSentence,
   getVehicleAuditActorLabel,
   type VehicleAuditLogRecord,
 } from "@/lib/vehicle-audit";
-import {
-  getActiveVehicleRestorePointCount,
-  purgeExpiredVehicleRestorePoints,
-} from "@/lib/vehicle-restore-points";
 
 const highlights = [
   {
     title: "Acceso protegido",
-    description:
-      "El panel queda reservado para usuarios autorizados.",
+    description: "El panel queda reservado para usuarios autorizados.",
     icon: Shield,
   },
   {
     title: "Historial de cambios",
-    description:
-      "Las altas, ediciones y bajas quedan registradas.",
+    description: "Las altas, ediciones y bajas quedan registradas.",
     icon: Sparkles,
   },
   {
     title: "Gestion por roles",
-    description:
-      "Administradores y gestores trabajan con permisos definidos.",
+    description: "Administradores y gestores trabajan con permisos definidos.",
     icon: FileText,
   },
 ];
 
-export const dynamic = "force-dynamic";
-
-function formatDate(value: Date) {
+function formatDate(value: string) {
   return new Intl.DateTimeFormat("es-AR", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(value);
+  }).format(new Date(value));
 }
 
-export default async function AdminPage() {
-  const admin = await requireAdminPageAccess();
-  const prisma = getPrismaClient();
-  const now = new Date();
+export default function AdminPage() {
+  const { admin } = useAuth();
+  const [vehicleCount, setVehicleCount] = useState(0);
+  const [usersCount, setUsersCount] = useState(0);
+  const [restorePointCount, setRestorePointCount] = useState(0);
+  const [recentActivity, setRecentActivity] = useState<VehicleAuditLogRecord[]>(
+    []
+  );
 
-  await purgeExpiredVehicleRestorePoints(now);
+  useEffect(() => {
+    let isCancelled = false;
 
-  const [vehicleCount, usersCount, restorePointCount, recentActivity] =
-    await Promise.all([
-      getVehicleCount(),
-      prisma.adminUser.count(),
-      getActiveVehicleRestorePointCount(now),
-      getRecentVehicleAuditLogs(8),
-    ]);
+    Promise.all([
+      fetchAdminVehicles(),
+      fetchAdminUsersSummary(),
+      fetchActiveVehicleRestorePointCount(),
+      fetchRecentVehicleAuditLogs(8),
+    ]).then(([vehicles, usersSummary, nextRestorePointCount, activity]) => {
+      if (isCancelled) {
+        return;
+      }
+
+      setVehicleCount(vehicles.length);
+      setUsersCount(usersSummary.totalUsers);
+      setRestorePointCount(nextRestorePointCount);
+      setRecentActivity(activity);
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -89,10 +102,12 @@ export default async function AdminPage() {
             </h2>
             <p className="mt-4 text-base leading-8 text-zinc-600 sm:text-lg">
               Ingresaste como{" "}
-              <span className="font-medium text-zinc-950">{admin.name}</span> y
-              tu perfil actual es{" "}
               <span className="font-medium text-zinc-950">
-                {getAdminRoleLabel(admin.role)}
+                {admin?.name ?? "Administrador"}
+              </span>{" "}
+              y tu perfil actual es{" "}
+              <span className="font-medium text-zinc-950">
+                {admin ? getAdminRoleLabel(admin.role) : "Administrador"}
               </span>
               . Desde aca podes seguir la actividad del stock y administrar el
               panel.
@@ -129,7 +144,7 @@ export default async function AdminPage() {
                   Papelera
                 </Link>
               </Button>
-              {admin.role === "SUPERADMIN" ? (
+              {admin?.role === "SUPERADMIN" ? (
                 <Button
                   asChild
                   size="lg"
@@ -191,7 +206,7 @@ export default async function AdminPage() {
           </div>
         ) : (
           <div className="mt-8 space-y-4">
-            {recentActivity.map((log: VehicleAuditLogRecord) => (
+            {recentActivity.map((log) => (
               <article
                 key={log.id}
                 className="rounded-[1.5rem] border border-zinc-200 bg-zinc-50 p-5"

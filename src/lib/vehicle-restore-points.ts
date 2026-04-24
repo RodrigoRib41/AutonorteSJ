@@ -1,40 +1,49 @@
-import { type Prisma, type VehicleRestoreAction } from "@prisma/client";
-
 import type { AuthenticatedAdmin } from "@/lib/admin-auth";
-import { deleteCloudinaryImage, isCloudinaryConfigured } from "@/lib/cloudinary";
-import { getPrismaClient } from "@/lib/prisma";
-import { vehicleAuditActorSelect } from "@/lib/vehicle-audit";
 import {
   getVehicleDisplayName,
   type VehicleCategory,
   type VehiclePersisted,
   type VehiclePayload,
+  type VehicleRestoreAction,
 } from "@/lib/vehicle-records";
 
 export const VEHICLE_RESTORE_RETENTION_DAYS = 7;
 const VEHICLE_RESTORE_RETENTION_MS =
   VEHICLE_RESTORE_RETENTION_DAYS * 24 * 60 * 60 * 1000;
 
-export const vehicleRestorePointInclude = {
-  actor: {
-    select: vehicleAuditActorSelect,
-  },
-  restoredBy: {
-    select: vehicleAuditActorSelect,
-  },
-  vehicle: {
-    select: {
-      id: true,
-      marca: true,
-      modelo: true,
-      deletedAt: true,
-    },
-  },
-} satisfies Prisma.VehicleRestorePointInclude;
-
-export type VehicleRestorePointRecord = Prisma.VehicleRestorePointGetPayload<{
-  include: typeof vehicleRestorePointInclude;
-}>;
+export type VehicleRestorePointRecord = {
+  id: string;
+  vehicleId: string;
+  vehicleLabel: string;
+  action: VehicleRestoreAction;
+  summary: string | null;
+  snapshot: unknown;
+  actorUserId: string | null;
+  actorName: string | null;
+  actorEmail: string | null;
+  createdAt: string;
+  expiresAt: string;
+  restoredAt: string | null;
+  restoredByUserId: string | null;
+  restoredByName: string | null;
+  restoredByEmail: string | null;
+  actor?: {
+    name?: string | null;
+    username?: string | null;
+    email?: string | null;
+  } | null;
+  restoredBy?: {
+    name?: string | null;
+    username?: string | null;
+    email?: string | null;
+  } | null;
+  vehicle?: {
+    id: string;
+    marca: string;
+    modelo: string;
+    deletedAt: string | null;
+  } | null;
+};
 
 export type VehicleSnapshotImage = {
   id: string;
@@ -165,7 +174,7 @@ function parseSnapshotImage(value: unknown): VehicleSnapshotImage | null {
     assetId,
     alt,
     sortOrder,
-    isPrimary: isPrimary ?? (sortOrder === 0),
+    isPrimary: isPrimary ?? sortOrder === 0,
     width,
     height,
     format,
@@ -178,11 +187,9 @@ export function getVehicleRestoreExpiresAt(baseDate = new Date()) {
   return new Date(baseDate.getTime() + VEHICLE_RESTORE_RETENTION_MS);
 }
 
-export function buildVehicleRestoreSnapshot(
-  vehicle: VehiclePersisted
-): Prisma.InputJsonObject {
+export function buildVehicleRestoreSnapshot(vehicle: VehiclePersisted) {
   return {
-    version: 1,
+    version: 1 as const,
     vehicle: {
       id: vehicle.id,
       marca: vehicle.marca,
@@ -199,9 +206,18 @@ export function buildVehicleRestoreSnapshot(
       createdByUserId: vehicle.createdByUserId,
       updatedByUserId: vehicle.updatedByUserId,
       deletedByUserId: vehicle.deletedByUserId,
-      deletedAt: vehicle.deletedAt?.toISOString() ?? null,
-      createdAt: vehicle.createdAt.toISOString(),
-      updatedAt: vehicle.updatedAt.toISOString(),
+      deletedAt:
+        vehicle.deletedAt instanceof Date
+          ? vehicle.deletedAt.toISOString()
+          : vehicle.deletedAt,
+      createdAt:
+        vehicle.createdAt instanceof Date
+          ? vehicle.createdAt.toISOString()
+          : vehicle.createdAt,
+      updatedAt:
+        vehicle.updatedAt instanceof Date
+          ? vehicle.updatedAt.toISOString()
+          : vehicle.updatedAt,
     },
     images: vehicle.images.map((image) => ({
       id: image.id,
@@ -214,13 +230,16 @@ export function buildVehicleRestoreSnapshot(
       height: image.height,
       format: image.format,
       bytes: image.bytes,
-      createdAt: image.createdAt.toISOString(),
+      createdAt:
+        image.createdAt instanceof Date
+          ? image.createdAt.toISOString()
+          : image.createdAt,
     })),
   };
 }
 
 export function parseVehicleRestoreSnapshot(
-  snapshot: Prisma.JsonValue
+  snapshot: unknown
 ): VehicleRestoreSnapshot | null {
   if (!isRecord(snapshot) || snapshot.version !== 1) {
     return null;
@@ -310,8 +329,8 @@ export function buildVehicleRestorePointData(
   summary?: string
 ) {
   return {
-    vehicleId: vehicle.id,
-    vehicleLabel: getVehicleDisplayName(vehicle),
+    vehicle_id: vehicle.id,
+    vehicle_label: getVehicleDisplayName(vehicle),
     action,
     summary:
       summary ??
@@ -319,10 +338,10 @@ export function buildVehicleRestorePointData(
         ? "Se elimino el vehiculo completo."
         : "Se guardo el estado anterior de la unidad."),
     snapshot: buildVehicleRestoreSnapshot(vehicle),
-    actorUserId: admin.id,
-    actorName: admin.name,
-    actorEmail: admin.username,
-    expiresAt: getVehicleRestoreExpiresAt(now),
+    actor_user_id: admin.id,
+    actor_name: admin.name,
+    actor_email: admin.email,
+    expires_at: getVehicleRestoreExpiresAt(now).toISOString(),
   };
 }
 
@@ -412,224 +431,4 @@ export function getVehicleRestoreActorLabel(log: {
     log.actor?.email?.trim() ||
     "Usuario no disponible"
   );
-}
-
-export async function getActiveVehicleRestorePoints(
-  now = new Date()
-): Promise<VehicleRestorePointRecord[]> {
-  return getPrismaClient().vehicleRestorePoint.findMany({
-    include: vehicleRestorePointInclude,
-    where: {
-      restoredAt: null,
-      expiresAt: {
-        gt: now,
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-}
-
-export async function getActiveVehicleRestorePointCount(now = new Date()) {
-  return getPrismaClient().vehicleRestorePoint.count({
-    where: {
-      restoredAt: null,
-      expiresAt: {
-        gt: now,
-      },
-    },
-  });
-}
-
-export async function restoreVehicleFromSnapshot(
-  tx: Prisma.TransactionClient,
-  restorePoint: {
-    vehicleId: string;
-    snapshot: Prisma.JsonValue;
-  },
-  admin: AuthenticatedAdmin
-) {
-  const snapshot = parseVehicleRestoreSnapshot(restorePoint.snapshot);
-
-  if (!snapshot) {
-    throw new Error("Invalid vehicle restore snapshot.");
-  }
-
-  const restoredVehicle = await tx.vehicle.update({
-    where: {
-      id: restorePoint.vehicleId,
-    },
-    data: {
-      marca: snapshot.vehicle.marca,
-      modelo: snapshot.vehicle.modelo,
-      condition: snapshot.vehicle.condition,
-      category: snapshot.vehicle.category,
-      anio: snapshot.vehicle.anio,
-      kilometraje: snapshot.vehicle.kilometraje,
-      precio: snapshot.vehicle.precio,
-      promotionalPrice: snapshot.vehicle.promotionalPrice,
-      currency: snapshot.vehicle.currency,
-      descripcion: snapshot.vehicle.descripcion,
-      destacado: snapshot.vehicle.destacado,
-      createdByUserId: snapshot.vehicle.createdByUserId,
-      updatedByUserId: admin.id,
-      deletedByUserId: null,
-      deletedAt: null,
-    },
-  });
-
-  await tx.vehicleImage.deleteMany({
-    where: {
-      vehicleId: restorePoint.vehicleId,
-    },
-  });
-
-  if (snapshot.images.length > 0) {
-    await tx.vehicleImage.createMany({
-      data: snapshot.images.map((image) => ({
-        id: image.id,
-        vehicleId: restorePoint.vehicleId,
-        publicId: image.publicId,
-        assetId: image.assetId,
-        alt: image.alt,
-        sortOrder: image.sortOrder,
-        isPrimary: image.isPrimary,
-        width: image.width,
-        height: image.height,
-        format: image.format,
-        bytes: image.bytes,
-        createdAt: new Date(image.createdAt),
-      })),
-    });
-  }
-
-  return restoredVehicle;
-}
-
-export async function purgeExpiredVehicleRestorePoints(now = new Date()) {
-  const prisma = getPrismaClient();
-  const [expiredDeletedVehicles, expiredUpdateRestorePoints] =
-    await Promise.all([
-      prisma.vehicleRestorePoint.findMany({
-        where: {
-          action: "DELETE",
-          restoredAt: null,
-          expiresAt: {
-            lte: now,
-          },
-          vehicle: {
-            deletedAt: {
-              not: null,
-            },
-          },
-        },
-        select: {
-          vehicleId: true,
-          vehicle: {
-            select: {
-              images: {
-                select: {
-                  publicId: true,
-                },
-              },
-            },
-          },
-        },
-      }),
-      prisma.vehicleRestorePoint.findMany({
-        where: {
-          action: "UPDATE",
-          restoredAt: null,
-          expiresAt: {
-            lte: now,
-          },
-        },
-        select: {
-          snapshot: true,
-        },
-      }),
-    ]);
-
-  const expiredSnapshotPublicIds = Array.from(
-    new Set(
-      expiredUpdateRestorePoints.flatMap((point) => {
-        const snapshot = parseVehicleRestoreSnapshot(point.snapshot);
-
-        return snapshot ? snapshot.images.map((image) => image.publicId) : [];
-      })
-    )
-  );
-
-  const stillReferencedImages =
-    expiredSnapshotPublicIds.length > 0
-      ? await prisma.vehicleImage.findMany({
-          where: {
-            publicId: {
-              in: expiredSnapshotPublicIds,
-            },
-          },
-          select: {
-            publicId: true,
-          },
-        })
-      : [];
-  const stillReferencedPublicIds = new Set(
-    stillReferencedImages.map((image) => image.publicId)
-  );
-  const orphanSnapshotPublicIds = expiredSnapshotPublicIds.filter(
-    (publicId) => !stillReferencedPublicIds.has(publicId)
-  );
-
-  const vehicleIdsToDelete = Array.from(
-    new Set(expiredDeletedVehicles.map((point) => point.vehicleId))
-  );
-
-  if (isCloudinaryConfigured()) {
-    const publicIds = Array.from(
-      new Set([
-        ...expiredDeletedVehicles.flatMap((point) =>
-          point.vehicle.images.map((image) => image.publicId)
-        ),
-        ...orphanSnapshotPublicIds,
-      ])
-    );
-    const destroyResults = await Promise.allSettled(
-      publicIds.map((publicId) => deleteCloudinaryImage(publicId))
-    );
-
-    const failedDeletion = destroyResults.find(
-      (result) => result.status === "rejected"
-    );
-
-    if (failedDeletion) {
-      console.error(
-        "Error deleting expired vehicle images from Cloudinary",
-        failedDeletion
-      );
-    }
-  }
-
-  await prisma.$transaction(async (tx) => {
-    if (vehicleIdsToDelete.length > 0) {
-      await tx.vehicle.deleteMany({
-        where: {
-          id: {
-            in: vehicleIdsToDelete,
-          },
-          deletedAt: {
-            not: null,
-          },
-        },
-      });
-    }
-
-    await tx.vehicleRestorePoint.deleteMany({
-      where: {
-        expiresAt: {
-          lte: now,
-        },
-      },
-    });
-  });
 }

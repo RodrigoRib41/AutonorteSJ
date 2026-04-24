@@ -1,11 +1,11 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 import { KeyRound } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import type { AdminUserPasswordResetResponse } from "@/lib/admin-users";
+import type { AdminUserApiRecord, AdminUserPasswordResetResponse } from "@/lib/admin-users";
+import { resetAdminUserPassword } from "@/lib/supabase-data";
 
 const inputClassName =
   "h-10 w-full rounded-full border border-zinc-200 bg-white px-4 text-sm text-zinc-950 outline-none transition focus:border-zinc-400 focus:ring-4 focus:ring-zinc-200/60";
@@ -13,13 +13,14 @@ const inputClassName =
 type ResetAdminUserPasswordFormProps = {
   userId: string;
   userUsername: string;
+  onSuccess?: (user: AdminUserApiRecord) => void;
 };
 
 export function ResetAdminUserPasswordForm({
   userId,
   userUsername,
+  onSuccess,
 }: ResetAdminUserPasswordFormProps) {
-  const router = useRouter();
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
@@ -34,21 +35,11 @@ export function ResetAdminUserPasswordForm({
     setHasError(false);
 
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          password,
-        }),
-      });
+      const result = (await resetAdminUserPassword(userId, {
+        password,
+      })) as AdminUserPasswordResetResponse;
 
-      const result = (await response
-        .json()
-        .catch(() => null)) as AdminUserPasswordResetResponse | null;
-
-      if (!response.ok || !result || !result.success) {
+      if (!result || !result.success) {
         const fieldError =
           result && !result.success ? result.fieldErrors?.password : undefined;
 
@@ -64,7 +55,7 @@ export function ResetAdminUserPasswordForm({
       setPassword("");
       setHasError(false);
       setStatusMessage("Password actualizada correctamente.");
-      router.refresh();
+      onSuccess?.(result.user);
     } catch {
       setHasError(true);
       setStatusMessage(

@@ -1,24 +1,25 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { getVehicleDisplayName } from "@/lib/vehicle-records";
+import { deleteVehicle } from "@/lib/supabase-data";
 
 type DeleteVehicleButtonProps = {
   vehicleId: string;
   marca: string;
   modelo: string;
+  onDeleted?: (vehicleId: string) => void;
 };
 
 export function DeleteVehicleButton({
   vehicleId,
   marca,
   modelo,
+  onDeleted,
 }: DeleteVehicleButtonProps) {
-  const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
   async function handleDelete() {
@@ -33,22 +34,16 @@ export function DeleteVehicleButton({
     setIsDeleting(true);
 
     try {
-      const response = await fetch(`/api/admin/vehicles/${vehicleId}`, {
-        method: "DELETE",
-      });
+      const result = await deleteVehicle(vehicleId);
 
-      const result = (await response.json().catch(() => null)) as
-        | { success?: boolean; message?: string }
-        | null;
-
-      if (!response.ok || !result?.success) {
+      if (!result?.success) {
         window.alert(
           result?.message ?? "No pudimos eliminar el vehiculo en este momento."
         );
         return;
       }
 
-      router.refresh();
+      onDeleted?.(vehicleId);
     } catch {
       window.alert("No pudimos eliminar el vehiculo en este momento.");
     } finally {

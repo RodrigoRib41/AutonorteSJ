@@ -5,103 +5,44 @@ import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { VehicleCard } from "@/components/vehicles/vehicle-card";
-import type { VehicleFilterValues } from "@/lib/vehicle-filters";
-import type {
-  VehicleApiRecord,
-  VehicleCatalogPageResponse,
-} from "@/lib/vehicle-records";
+import type { VehicleApiRecord } from "@/lib/vehicle-records";
 
 type VehicleInfiniteListProps = {
   initialVehicles: VehicleApiRecord[];
-  filters: VehicleFilterValues;
   pageSize: number;
   totalCount: number;
   hasFilters: boolean;
 };
 
-function buildCatalogUrl(
-  filters: VehicleFilterValues,
-  offset: number,
-  limit: number
-) {
-  const params = new URLSearchParams();
-
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value) {
-      params.set(key, value);
-    }
-  });
-
-  params.set("offset", String(offset));
-  params.set("limit", String(limit));
-
-  return `/api/vehicles?${params.toString()}`;
-}
-
 export function VehicleInfiniteList({
   initialVehicles,
-  filters,
   pageSize,
   totalCount,
   hasFilters,
 }: VehicleInfiniteListProps) {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-  const isLoadingRef = useRef(false);
-  const [vehicles, setVehicles] = useState(initialVehicles);
-  const [nextOffset, setNextOffset] = useState(initialVehicles.length);
+  const [visibleCount, setVisibleCount] = useState(
+    Math.min(initialVehicles.length, pageSize)
+  );
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
   const unitLabel = totalCount === 1 ? "unidad" : "unidades";
+  const visibleVehicles = initialVehicles.slice(0, visibleCount);
+  const hasMore = visibleCount < initialVehicles.length;
 
-  const hasMore = nextOffset < totalCount;
-
-  const loadMore = useCallback(async () => {
-    if (isLoadingRef.current || nextOffset >= totalCount) {
+  const loadMore = useCallback(() => {
+    if (isLoading || !hasMore) {
       return;
     }
 
-    isLoadingRef.current = true;
     setIsLoading(true);
-    setErrorMessage("");
 
-    try {
-      const response = await fetch(
-        buildCatalogUrl(filters, nextOffset, pageSize)
+    window.requestAnimationFrame(() => {
+      setVisibleCount((currentCount) =>
+        Math.min(initialVehicles.length, currentCount + pageSize)
       );
-      const result = (await response
-        .json()
-        .catch(() => null)) as VehicleCatalogPageResponse | null;
-
-      if (!response.ok || !result) {
-        throw new Error("No pudimos cargar mas vehiculos.");
-      }
-
-      if (!result.success) {
-        throw new Error(result.message);
-      }
-
-      setVehicles((currentVehicles) => {
-        const existingIds = new Set(
-          currentVehicles.map((vehicle) => vehicle.id)
-        );
-        const nextVehicles = result.vehicles.filter(
-          (vehicle) => !existingIds.has(vehicle.id)
-        );
-
-        return [...currentVehicles, ...nextVehicles];
-      });
-      setNextOffset(result.nextOffset);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "No pudimos cargar mas vehiculos."
-      );
-    } finally {
-      isLoadingRef.current = false;
       setIsLoading(false);
-    }
-  }, [filters, nextOffset, pageSize, totalCount]);
+    });
+  }, [hasMore, initialVehicles.length, isLoading, pageSize]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -113,7 +54,7 @@ export function VehicleInfiniteList({
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {
-          void loadMore();
+          loadMore();
         }
       },
       {
@@ -140,12 +81,12 @@ export function VehicleInfiniteList({
           </h2>
         </div>
         <p className="w-fit rounded-full border border-zinc-950/10 bg-white/80 px-3 py-2 text-sm text-zinc-600">
-          Mostrando {vehicles.length} de {totalCount} {unitLabel}.
+          Mostrando {visibleVehicles.length} de {totalCount} {unitLabel}.
         </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-        {vehicles.map((vehicle, index) => (
+        {visibleVehicles.map((vehicle, index) => (
           <VehicleCard
             key={vehicle.id}
             vehicle={vehicle}
@@ -162,7 +103,7 @@ export function VehicleInfiniteList({
               size="lg"
               variant="outline"
               disabled={isLoading}
-              onClick={() => void loadMore()}
+              onClick={loadMore}
               className="h-12 rounded-full border-zinc-950 bg-zinc-950 px-6 text-[var(--brand-primary)] hover:bg-zinc-900 disabled:cursor-not-allowed"
             >
               {isLoading ? (
@@ -178,18 +119,12 @@ export function VehicleInfiniteList({
               Hay mas unidades para ver.
             </p>
           </div>
-        ) : vehicles.length > 0 ? (
+        ) : initialVehicles.length > 0 ? (
           <p className="rounded-full border border-zinc-950/20 bg-white px-4 py-2 text-sm text-zinc-600">
             Ya estas viendo todo el stock disponible.
           </p>
         ) : null}
       </div>
-
-      {errorMessage ? (
-        <div className="rounded-[1.25rem] border border-red-200 bg-red-50 px-5 py-4 text-center text-sm text-red-700">
-          {errorMessage}
-        </div>
-      ) : null}
     </section>
   );
 }

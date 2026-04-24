@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { CarFront, PencilLine, Trash2 } from "lucide-react";
 
@@ -21,6 +20,7 @@ import {
   getVehicleDisplayPrice,
   hasVehiclePromotion,
 } from "@/lib/vehicle-records";
+import { bulkDeleteVehicles } from "@/lib/supabase-data";
 
 export type AdminVehiclesTableItem = {
   id: string;
@@ -46,10 +46,13 @@ export type AdminVehiclesTableItem = {
 
 type AdminVehiclesTableProps = {
   vehicles: AdminVehiclesTableItem[];
+  onVehiclesDeleted?: (vehicleIds: string[]) => void;
 };
 
-export function AdminVehiclesTable({ vehicles }: AdminVehiclesTableProps) {
-  const router = useRouter();
+export function AdminVehiclesTable({
+  vehicles,
+  onVehiclesDeleted,
+}: AdminVehiclesTableProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const selectedCount = selectedIds.size;
@@ -125,20 +128,12 @@ export function AdminVehiclesTable({ vehicles }: AdminVehiclesTableProps) {
     setIsBulkDeleting(true);
 
     try {
-      const response = await fetch("/api/admin/vehicles", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ids: Array.from(selectedIds),
-        }),
-      });
-      const result = (await response.json().catch(() => null)) as
-        | VehicleBulkDeleteResponse
-        | null;
+      const deletedIds = Array.from(selectedIds);
+      const result = (await bulkDeleteVehicles(
+        deletedIds
+      )) as VehicleBulkDeleteResponse;
 
-      if (!response.ok || !result?.success) {
+      if (!result.success) {
         window.alert(
           result?.message ??
             "No pudimos eliminar los vehiculos seleccionados."
@@ -147,7 +142,7 @@ export function AdminVehiclesTable({ vehicles }: AdminVehiclesTableProps) {
       }
 
       setSelectedIds(new Set());
-      router.refresh();
+      onVehiclesDeleted?.(deletedIds);
     } catch {
       window.alert("No pudimos eliminar los vehiculos seleccionados.");
     } finally {
@@ -344,7 +339,10 @@ export function AdminVehiclesTable({ vehicles }: AdminVehiclesTableProps) {
                         className="h-9 rounded-full border-zinc-300 bg-white px-4 text-zinc-900 hover:bg-zinc-50"
                       >
                         <Link
-                          href={`/admin/vehiculos/${vehicle.id}/editar`}
+                          href={{
+                            pathname: "/admin/vehiculos/editar",
+                            query: { id: vehicle.id },
+                          }}
                           prefetch={false}
                         >
                           <PencilLine className="size-4" />
@@ -355,6 +353,14 @@ export function AdminVehiclesTable({ vehicles }: AdminVehiclesTableProps) {
                         vehicleId={vehicle.id}
                         marca={vehicle.marca}
                         modelo={vehicle.modelo}
+                        onDeleted={(deletedVehicleId) => {
+                          setSelectedIds((current) => {
+                            const next = new Set(current);
+                            next.delete(deletedVehicleId);
+                            return next;
+                          });
+                          onVehiclesDeleted?.([deletedVehicleId]);
+                        }}
                       />
                     </div>
                   </td>

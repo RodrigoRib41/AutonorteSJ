@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { createVehicle, updateVehicle } from "@/lib/supabase-data";
 import {
   emptyVehicleFormValues,
   MAX_FEATURED_VEHICLES,
@@ -32,7 +33,11 @@ const inputClassName =
 const textareaClassName =
   "min-h-36 w-full rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-950 outline-none transition focus:border-zinc-400 focus:ring-4 focus:ring-zinc-200/60";
 
-export function VehicleForm({ mode, vehicle, featuredVehicles }: VehicleFormProps) {
+export function VehicleForm({
+  mode,
+  vehicle,
+  featuredVehicles,
+}: VehicleFormProps) {
   const router = useRouter();
   const [values, setValues] = useState<VehicleFormValues>(
     vehicle ? vehicleToFormValues(vehicle) : emptyVehicleFormValues
@@ -118,41 +123,31 @@ export function VehicleForm({ mode, vehicle, featuredVehicles }: VehicleFormProp
     setErrorMessage("");
     setSuccessMessage("");
 
-    const endpoint =
-      mode === "create" ? "/api/admin/vehicles" : `/api/admin/vehicles/${vehicle?.id}`;
-    const method = mode === "create" ? "POST" : "PUT";
-
     try {
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          marca: values.marca,
-          modelo: values.modelo,
-          condition: values.condition,
-          category: values.category,
-          anio: Number(values.anio),
-          kilometraje: Number(values.kilometraje),
-          precio: Number(values.precio),
-          promotionalPrice: values.promotionalPrice
-            ? Number(values.promotionalPrice)
-            : null,
-          currency: values.currency,
-          descripcion: values.descripcion,
-          destacado: values.destacado,
-          featuredReplacementVehicleId: values.destacado
-            ? featuredReplacementVehicleId
-            : null,
-        }),
-      });
+      const payload = {
+        marca: values.marca,
+        modelo: values.modelo,
+        condition: values.condition,
+        category: values.category,
+        anio: Number(values.anio),
+        kilometraje: Number(values.kilometraje),
+        precio: Number(values.precio),
+        promotionalPrice: values.promotionalPrice
+          ? Number(values.promotionalPrice)
+          : null,
+        currency: values.currency,
+        descripcion: values.descripcion,
+        destacado: values.destacado,
+        featuredReplacementVehicleId: values.destacado
+          ? featuredReplacementVehicleId
+          : null,
+      };
+      const result =
+        mode === "create"
+          ? ((await createVehicle(payload)) as VehicleItemResponse)
+          : ((await updateVehicle(vehicle?.id ?? "", payload)) as VehicleItemResponse);
 
-      const result = (await response
-        .json()
-        .catch(() => null)) as VehicleItemResponse | null;
-
-      if (!response.ok || !result || !result.success) {
+      if (!result || !result.success) {
         if (
           result &&
           !result.success &&
@@ -181,7 +176,9 @@ export function VehicleForm({ mode, vehicle, featuredVehicles }: VehicleFormProp
 
       if (mode === "create" && result.vehicle?.id) {
         router.push(
-          `/admin/vehiculos/${result.vehicle.id}/editar?created=1#imagenes`
+          `/admin/vehiculos/editar?id=${encodeURIComponent(
+            result.vehicle.id
+          )}&created=1#imagenes`
         );
         router.refresh();
         return;
@@ -190,7 +187,6 @@ export function VehicleForm({ mode, vehicle, featuredVehicles }: VehicleFormProp
       setSuccessMessage(
         "Datos guardados correctamente. Ahora podes administrar las fotos."
       );
-      router.refresh();
     } catch {
       setErrorMessage(
         "No pudimos guardar el vehiculo en este momento. Intenta nuevamente."

@@ -144,7 +144,13 @@ export function VehicleCard({
           variant="outline"
           className="h-11 w-full rounded-full border-zinc-950 bg-zinc-950 text-[var(--brand-primary)] hover:bg-zinc-900"
         >
-          <Link href={`/vehiculos/${vehicle.id}`} prefetch={false}>
+          <Link
+            href={{
+              pathname: "/vehiculos/detalle",
+              query: { id: vehicle.id },
+            }}
+            prefetch={false}
+          >
             Ver detalle
             <ArrowRight className="size-4" />
           </Link>

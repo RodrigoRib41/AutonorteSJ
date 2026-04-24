@@ -401,6 +401,35 @@ function getFunctionErrorMessage(error: unknown, fallbackMessage: string) {
   return error instanceof Error && error.message ? error.message : fallbackMessage;
 }
 
+function getSupabaseQueryErrorMessage(error: unknown, fallbackMessage: string) {
+  if (!error || typeof error !== "object") {
+    return fallbackMessage;
+  }
+
+  const message = "message" in error && typeof error.message === "string"
+    ? error.message.trim()
+    : "";
+  const code = "code" in error && typeof error.code === "string"
+    ? error.code.trim()
+    : "";
+  const hint = "hint" in error && typeof error.hint === "string"
+    ? error.hint.trim()
+    : "";
+
+  if (code === "PGRST205") {
+    return [
+      fallbackMessage,
+      "La base de datos de Supabase no tiene el esquema esperado.",
+      "Aplica la migracion 20260423223000_cloudflare_pages_supabase.sql.",
+      hint ? `Pista: ${hint}.` : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  return message || fallbackMessage;
+}
+
 export async function fetchPublishedVehicles() {
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
@@ -410,7 +439,12 @@ export async function fetchPublishedVehicles() {
     .order("updated_at", { ascending: false });
 
   if (error) {
-    throw new Error("No pudimos cargar el stock publicado.");
+    throw new Error(
+      getSupabaseQueryErrorMessage(
+        error,
+        "No pudimos cargar el stock publicado."
+      )
+    );
   }
 
   return sortVehicleRecords((data ?? []).map(mapVehicleRow));
@@ -427,7 +461,12 @@ export async function fetchFeaturedVehicles(limit = 3) {
     .limit(limit);
 
   if (error) {
-    throw new Error("No pudimos cargar los vehiculos destacados.");
+    throw new Error(
+      getSupabaseQueryErrorMessage(
+        error,
+        "No pudimos cargar los vehiculos destacados."
+      )
+    );
   }
 
   return sortVehicleRecords((data ?? []).map(mapVehicleRow)).slice(0, limit);
@@ -443,7 +482,12 @@ export async function fetchPublishedVehicleById(id: string) {
     .maybeSingle();
 
   if (error) {
-    throw new Error("No pudimos cargar la ficha de la unidad.");
+    throw new Error(
+      getSupabaseQueryErrorMessage(
+        error,
+        "No pudimos cargar la ficha de la unidad."
+      )
+    );
   }
 
   return data ? mapVehicleRow(data) : null;
@@ -458,7 +502,12 @@ export async function fetchAdminVehicles() {
     .order("updated_at", { ascending: false });
 
   if (error) {
-    throw new Error("No pudimos cargar el stock del panel.");
+    throw new Error(
+      getSupabaseQueryErrorMessage(
+        error,
+        "No pudimos cargar el stock del panel."
+      )
+    );
   }
 
   return sortVehicleRecords((data ?? []).map(mapVehicleRow));
@@ -474,7 +523,12 @@ export async function fetchAdminVehicleById(id: string) {
     .maybeSingle();
 
   if (error) {
-    throw new Error("No pudimos cargar la unidad del panel.");
+    throw new Error(
+      getSupabaseQueryErrorMessage(
+        error,
+        "No pudimos cargar la unidad del panel."
+      )
+    );
   }
 
   return data ? mapVehicleRow(data) : null;
@@ -499,7 +553,12 @@ export async function fetchFeaturedVehicleReplacementOptions(
   const { data, error } = await query;
 
   if (error) {
-    throw new Error("No pudimos cargar los destacados actuales.");
+    throw new Error(
+      getSupabaseQueryErrorMessage(
+        error,
+        "No pudimos cargar los destacados actuales."
+      )
+    );
   }
 
   return (data ?? []) as FeaturedVehicleOption[];
@@ -514,7 +573,12 @@ export async function fetchAdminUsers() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    throw new Error("No pudimos cargar los usuarios del panel.");
+    throw new Error(
+      getSupabaseQueryErrorMessage(
+        error,
+        "No pudimos cargar los usuarios del panel."
+      )
+    );
   }
 
   return (data ?? []).map(mapAdminUserRow);
@@ -533,7 +597,12 @@ export async function fetchRecentVehicleAuditLogs(limit = 8) {
     .limit(limit);
 
   if (error) {
-    throw new Error("No pudimos cargar la actividad reciente.");
+    throw new Error(
+      getSupabaseQueryErrorMessage(
+        error,
+        "No pudimos cargar la actividad reciente."
+      )
+    );
   }
 
   return (data ?? []).map(mapVehicleAuditLogRow);
@@ -549,7 +618,9 @@ export async function fetchActiveVehicleRestorePoints(now = new Date()) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    throw new Error("No pudimos cargar la papelera.");
+    throw new Error(
+      getSupabaseQueryErrorMessage(error, "No pudimos cargar la papelera.")
+    );
   }
 
   return (data ?? []).map(mapVehicleRestorePointRow);
@@ -564,7 +635,12 @@ export async function fetchActiveVehicleRestorePointCount(now = new Date()) {
     .gt("expires_at", now.toISOString());
 
   if (error) {
-    throw new Error("No pudimos contar los movimientos disponibles.");
+    throw new Error(
+      getSupabaseQueryErrorMessage(
+        error,
+        "No pudimos contar los movimientos disponibles."
+      )
+    );
   }
 
   return count ?? 0;

@@ -7,6 +7,10 @@ import { normalizeAdminUsername } from "@/lib/admin-users";
 
 export type { AdminRoleValue } from "@/lib/admin-role-utils";
 
+const adminAuthEmailDomain =
+  process.env.NEXT_PUBLIC_ADMIN_AUTH_EMAIL_DOMAIN?.trim() ||
+  "autonortesj-admin.com";
+
 export const allAdminRoles: AdminRoleValue[] = ["SUPERADMIN", "GESTOR"];
 export const superadminOnlyRoles: AdminRoleValue[] = ["SUPERADMIN"];
 export const vehicleManagerRoles: AdminRoleValue[] = ["SUPERADMIN", "GESTOR"];
@@ -30,7 +34,7 @@ export function hasRequiredRole(
 
 export function toAdminAuthEmail(username: string) {
   const normalized = normalizeAdminUsername(username);
-  return normalized ? `${normalized}@admin.autonorte.local` : "";
+  return normalized ? `${normalized}@${adminAuthEmailDomain}` : "";
 }
 
 export function getAdminUsernameFromUser(user: User | null | undefined) {

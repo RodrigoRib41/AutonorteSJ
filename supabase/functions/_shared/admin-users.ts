@@ -12,12 +12,17 @@ function asString(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+const adminAuthEmailDomain =
+  Deno.env.get("ADMIN_AUTH_EMAIL_DOMAIN")?.trim() ||
+  Deno.env.get("NEXT_PUBLIC_ADMIN_AUTH_EMAIL_DOMAIN")?.trim() ||
+  "autonortesj-admin.com";
+
 export function normalizeAdminUsername(value: unknown) {
   return asString(value).toLowerCase();
 }
 
 export function toAdminAuthEmail(username: string) {
-  return username ? `${username}@admin.autonorte.local` : "";
+  return username ? `${username}@${adminAuthEmailDomain}` : "";
 }
 
 export function parseAdminUserPayload(input: unknown): AdminUserPayload {

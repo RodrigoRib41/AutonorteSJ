@@ -6,7 +6,9 @@
     "dev": "next dev --webpack",
     "dev:turbo": "next dev --turbo",
     "build": "next build",
-    "start": "next start",
+    "bootstrap:admin": "node scripts/bootstrap-supabase-admin.mjs",
+    "preview": "node scripts/serve-static.mjs",
+    "start": "node scripts/serve-static.mjs",
     "lint": "eslint"
   },
   "dependencies": {

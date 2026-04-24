@@ -4,21 +4,30 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 let browserClient: SupabaseClient | null = null;
 
-function getRequiredEnv(name: "NEXT_PUBLIC_SUPABASE_URL" | "NEXT_PUBLIC_SUPABASE_ANON_KEY") {
-  const value = process.env[name]?.trim();
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? "";
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ?? "";
 
-  if (!value) {
-    throw new Error(`Missing ${name}.`);
+function getRequiredSupabaseUrl() {
+  if (!supabaseUrl) {
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL.");
   }
 
-  return value;
+  return supabaseUrl;
+}
+
+function getRequiredSupabaseAnonKey() {
+  if (!supabaseAnonKey) {
+    throw new Error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY.");
+  }
+
+  return supabaseAnonKey;
 }
 
 export function getSupabaseClient() {
   if (!browserClient) {
     browserClient = createClient(
-      getRequiredEnv("NEXT_PUBLIC_SUPABASE_URL"),
-      getRequiredEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
+      getRequiredSupabaseUrl(),
+      getRequiredSupabaseAnonKey(),
       {
         auth: {
           persistSession: true,

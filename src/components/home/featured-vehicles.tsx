@@ -21,6 +21,11 @@ export function FeaturedVehicles() {
           setFeaturedVehicles(vehicles);
         }
       })
+      .catch((error) => {
+        if (!isCancelled && error instanceof Error) {
+          console.error(error.message);
+        }
+      })
       .finally(() => {
         if (!isCancelled) {
           setHasLoaded(true);

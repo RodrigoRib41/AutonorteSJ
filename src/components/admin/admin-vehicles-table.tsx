@@ -26,6 +26,7 @@ export type AdminVehiclesTableItem = {
   id: string;
   marca: string;
   modelo: string;
+  version: string | null;
   condition: VehicleCondition;
   category: VehicleCategory;
   anio: number;
@@ -246,7 +247,7 @@ export function AdminVehiclesTable({ vehicles }: AdminVehiclesTableProps) {
                             format={vehicle.primaryImage.format}
                             alt={
                               vehicle.primaryImage.alt ??
-                              `${vehicle.marca} ${vehicle.modelo}`
+                              getVehicleDisplayName(vehicle)
                             }
                             variant="adminThumbnail"
                             fill
@@ -267,6 +268,11 @@ export function AdminVehiclesTable({ vehicles }: AdminVehiclesTableProps) {
                         <p className="mt-2 text-lg font-semibold text-zinc-950">
                           {vehicle.modelo}
                         </p>
+                        {vehicle.version ? (
+                          <p className="mt-1 text-sm font-semibold text-zinc-700">
+                            {vehicle.version}
+                          </p>
+                        ) : null}
                         <p className="mt-2 text-sm text-zinc-500">
                           {getVehicleDisplayName(vehicle)} |{" "}
                           {vehicle.imageCount} fotos
@@ -355,6 +361,7 @@ export function AdminVehiclesTable({ vehicles }: AdminVehiclesTableProps) {
                         vehicleId={vehicle.id}
                         marca={vehicle.marca}
                         modelo={vehicle.modelo}
+                        version={vehicle.version}
                       />
                     </div>
                   </td>

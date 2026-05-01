@@ -67,6 +67,7 @@ model Vehicle {
   id               String                @id @default(cuid())
   marca            String
   modelo           String
+  version          String?
   condition        VehicleCondition      @default(USED)
   category         VehicleCategory       @default(CAR)
   anio             Int

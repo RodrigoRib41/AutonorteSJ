@@ -9,6 +9,7 @@ import {
   formatPrecio,
   getVehicleCategoryLabel,
   getVehicleConditionLabel,
+  getVehicleDisplayName,
 } from "@/lib/vehicle-records";
 import {
   getActiveVehicleRestorePoints,
@@ -184,7 +185,7 @@ export default async function AdminTrashPage() {
                             Estado anterior
                           </p>
                           <p className="mt-2 font-semibold text-zinc-950">
-                            {snapshotVehicle.marca} {snapshotVehicle.modelo}
+                            {getVehicleDisplayName(snapshotVehicle)}
                           </p>
                         </div>
                         <div className="rounded-[1.25rem] border border-zinc-200 bg-zinc-50 p-4">

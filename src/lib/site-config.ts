@@ -6,6 +6,19 @@ function getPublicEnv(value: string | undefined, fallback = "") {
   return value && value.length > 0 ? value : fallback;
 }
 
+function buildGoogleMapsEmbedUrl(address: string) {
+  return `https://www.google.com/maps?q=${encodeURIComponent(address)}&output=embed`;
+}
+
+function buildGoogleMapsDirectionsUrl(address: string) {
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+}
+
+const contactAddress = getPublicEnv(
+  process.env.NEXT_PUBLIC_CONTACT_ADDRESS,
+  "Av. principal 1234, Ciudad Autonoma de Buenos Aires"
+);
+
 export const siteConfig = {
   name: "TestAutomotores",
   description: "Compra, venta, permuta y financiacion de vehiculos.",
@@ -22,10 +35,9 @@ export const siteConfig = {
       process.env.NEXT_PUBLIC_CONTACT_EMAIL,
       "ventas@testautomotores.com"
     ),
-    address: getPublicEnv(
-      process.env.NEXT_PUBLIC_CONTACT_ADDRESS,
-      "Av. principal 1234, Ciudad Autonoma de Buenos Aires"
-    ),
+    address: contactAddress,
+    mapEmbedUrl: buildGoogleMapsEmbedUrl(contactAddress),
+    mapDirectionsUrl: buildGoogleMapsDirectionsUrl(contactAddress),
   },
   businessHours: {
     weekdays: getPublicEnv(

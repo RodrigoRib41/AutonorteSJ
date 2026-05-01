@@ -27,6 +27,7 @@ export const vehicleRestorePointInclude = {
       id: true,
       marca: true,
       modelo: true,
+      version: true,
       deletedAt: true,
     },
   },
@@ -187,6 +188,7 @@ export function buildVehicleRestoreSnapshot(
       id: vehicle.id,
       marca: vehicle.marca,
       modelo: vehicle.modelo,
+      version: vehicle.version,
       condition: vehicle.condition,
       category: vehicle.category,
       anio: vehicle.anio,
@@ -238,6 +240,7 @@ export function parseVehicleRestoreSnapshot(
   const id = readString(vehicle.id);
   const marca = readString(vehicle.marca);
   const modelo = readString(vehicle.modelo);
+  const version = "version" in vehicle ? readNullableString(vehicle.version) : null;
   const condition = readString(vehicle.condition);
   const category = readVehicleCategory(vehicle.category);
   const anio = readNumber(vehicle.anio);
@@ -258,6 +261,7 @@ export function parseVehicleRestoreSnapshot(
     !id ||
     !marca ||
     !modelo ||
+    version === undefined ||
     (condition !== "ZERO_KM" && condition !== "USED") ||
     anio === null ||
     kilometraje === null ||
@@ -282,6 +286,7 @@ export function parseVehicleRestoreSnapshot(
       id,
       marca,
       modelo,
+      version,
       condition,
       category,
       anio,
@@ -334,6 +339,7 @@ export function buildVehiclePayloadChangeSummary(
 
   if (vehicle.marca !== payload.marca) changedFields.push("marca");
   if (vehicle.modelo !== payload.modelo) changedFields.push("modelo");
+  if ((vehicle.version ?? null) !== payload.version) changedFields.push("version");
   if (vehicle.category !== payload.category) changedFields.push("categoria");
   if (vehicle.condition !== payload.condition) changedFields.push("tipo");
   if (vehicle.anio !== payload.anio) changedFields.push("anio");
@@ -463,6 +469,7 @@ export async function restoreVehicleFromSnapshot(
     data: {
       marca: snapshot.vehicle.marca,
       modelo: snapshot.vehicle.modelo,
+      version: snapshot.vehicle.version,
       condition: snapshot.vehicle.condition,
       category: snapshot.vehicle.category,
       anio: snapshot.vehicle.anio,

@@ -7,6 +7,7 @@ import {
   getVehicleBrands,
   getVehicleById,
   getVehicleCount,
+  getVehiclesByIds,
 } from "@/lib/vehicle-queries";
 
 export const PUBLIC_VEHICLES_CACHE_TAG = "public-vehicles";
@@ -39,6 +40,15 @@ export const getPublicPaginatedVehicles = unstable_cache(
 export const getPublicVehicleById = unstable_cache(
   async (id: string) => getVehicleById(id),
   ["public-vehicle-by-id"],
+  {
+    revalidate: PUBLIC_VEHICLES_REVALIDATE_SECONDS,
+    tags: [PUBLIC_VEHICLES_CACHE_TAG],
+  }
+);
+
+export const getPublicVehiclesByIds = unstable_cache(
+  async (ids: string[]) => getVehiclesByIds(ids),
+  ["public-vehicles-by-ids"],
   {
     revalidate: PUBLIC_VEHICLES_REVALIDATE_SECONDS,
     tags: [PUBLIC_VEHICLES_CACHE_TAG],

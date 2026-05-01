@@ -76,11 +76,14 @@ export function buildVehicleAuditLogData(
     id: string;
     marca: string;
     modelo: string;
+    version?: string | null;
   }
 ) {
   return {
     vehicleId: vehicle.id,
-    vehicleLabel: `${vehicle.marca} ${vehicle.modelo}`.trim(),
+    vehicleLabel: [vehicle.marca, vehicle.modelo, vehicle.version]
+      .filter(Boolean)
+      .join(" "),
     action,
     actorUserId: admin.id,
     actorName: admin.name,

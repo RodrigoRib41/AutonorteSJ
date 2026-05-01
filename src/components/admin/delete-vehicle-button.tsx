@@ -11,19 +11,21 @@ type DeleteVehicleButtonProps = {
   vehicleId: string;
   marca: string;
   modelo: string;
+  version?: string | null;
 };
 
 export function DeleteVehicleButton({
   vehicleId,
   marca,
   modelo,
+  version,
 }: DeleteVehicleButtonProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
   async function handleDelete() {
     const confirmed = window.confirm(
-      `Vas a mover ${getVehicleDisplayName({ marca, modelo })} a la papelera. La unidad se oculta del sitio y puede restaurarse durante 7 dias.`
+      `Vas a mover ${getVehicleDisplayName({ marca, modelo, version })} a la papelera. La unidad se oculta del sitio y puede restaurarse durante 7 dias.`
     );
 
     if (!confirmed) {

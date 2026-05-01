@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { ArrowRight, CalendarDays, Gauge, ImageIcon, Tag } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarDays,
+  Gauge,
+  ImageIcon,
+  Scale,
+  Tag,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { CloudinaryVehicleImage } from "@/components/vehicles/cloudinary-vehicle-image";
@@ -8,6 +15,7 @@ import {
   formatPrecio,
   getVehicleCategoryLabel,
   getVehicleConditionLabel,
+  getVehicleDisplayName,
   getVehicleDisplayPrice,
   getVehiclePrimaryImage,
   hasVehiclePromotion,
@@ -18,16 +26,23 @@ type VehicleCardProps = {
   imageSizes?: string;
   vehicle: VehiclePreview;
   preload?: boolean;
+  compareSelected?: boolean;
+  compareDisabled?: boolean;
+  onCompareToggle?: (vehicleId: string) => void;
 };
 
 export function VehicleCard({
   imageSizes = "(min-width: 1024px) 33vw, 100vw",
   vehicle,
   preload = false,
+  compareSelected = false,
+  compareDisabled = false,
+  onCompareToggle,
 }: VehicleCardProps) {
   const primaryImage = getVehiclePrimaryImage(vehicle);
   const hasPromotion = hasVehiclePromotion(vehicle);
   const displayPrice = getVehicleDisplayPrice(vehicle);
+  const vehicleName = getVehicleDisplayName(vehicle);
 
   return (
     <article className="group overflow-hidden rounded-[1rem] border border-zinc-950/15 bg-white shadow-[0_10px_28px_rgba(0,0,0,0.1)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_58px_rgba(0,0,0,0.18)] sm:rounded-[1.25rem] sm:shadow-[0_16px_40px_rgba(0,0,0,0.12)]">
@@ -37,7 +52,7 @@ export function VehicleCard({
             <CloudinaryVehicleImage
               publicId={primaryImage.publicId}
               format={primaryImage.format}
-              alt={primaryImage.alt ?? `${vehicle.marca} ${vehicle.modelo}`}
+              alt={primaryImage.alt ?? vehicleName}
               variant="card"
               fill
               preload={preload}
@@ -47,7 +62,7 @@ export function VehicleCard({
             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/70 via-zinc-950/14 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-3 sm:p-5">
               <h3 className="text-lg font-semibold tracking-tight text-white drop-shadow-sm sm:text-2xl">
-                {vehicle.marca} {vehicle.modelo}
+                {vehicleName}
               </h3>
             </div>
           </div>
@@ -58,7 +73,7 @@ export function VehicleCard({
                 Sin imagenes
               </p>
               <h3 className="mt-2 text-xl font-semibold tracking-tight text-zinc-950">
-                {vehicle.marca} {vehicle.modelo}
+                {vehicleName}
               </h3>
               <p className="mt-1 text-sm font-medium text-zinc-700">
                 Consultanos por fotos.
@@ -138,6 +153,17 @@ export function VehicleCard({
           </div>
         </div>
 
+        {vehicle.version ? (
+          <div className="rounded-[0.9rem] border border-zinc-950/10 bg-white px-3 py-2">
+            <div className="text-[10px] font-semibold tracking-[0.12em] text-zinc-500 uppercase">
+              Version
+            </div>
+            <p className="mt-1 truncate text-sm font-semibold text-zinc-950">
+              {vehicle.version}
+            </p>
+          </div>
+        ) : null}
+
         <Button
           asChild
           size="lg"
@@ -149,6 +175,24 @@ export function VehicleCard({
             <ArrowRight className="size-4" />
           </Link>
         </Button>
+
+        {onCompareToggle ? (
+          <Button
+            type="button"
+            size="lg"
+            variant="outline"
+            disabled={compareDisabled && !compareSelected}
+            onClick={() => onCompareToggle(vehicle.id)}
+            className={
+              compareSelected
+                ? "h-11 w-full rounded-full border-[var(--brand-primary)] bg-[var(--brand-primary)] text-zinc-950 hover:bg-[var(--brand-primary-hover)]"
+                : "h-11 w-full rounded-full border-zinc-300 bg-white text-zinc-950 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:border-zinc-200 disabled:text-zinc-400"
+            }
+          >
+            <Scale className="size-4" />
+            {compareSelected ? "Seleccionado" : "Comparar"}
+          </Button>
+        ) : null}
       </div>
     </article>
   );

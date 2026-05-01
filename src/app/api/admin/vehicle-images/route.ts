@@ -21,6 +21,7 @@ import {
   buildVehicleRestorePointData,
 } from "@/lib/vehicle-restore-points";
 import {
+  getVehicleDisplayName,
   MAX_VEHICLE_IMAGES,
   type VehicleImageDeleteResponse,
   type VehicleImagesResponse,
@@ -288,7 +289,7 @@ export async function POST(request: Request) {
                 vehicleId,
                 publicId: asset.publicId,
                 assetId: asset.assetId,
-                alt: `${vehicle.marca} ${vehicle.modelo}`,
+                alt: getVehicleDisplayName(vehicle),
                 sortOrder: vehicle.images.length + index,
                 isPrimary: vehicle.images.length + index === 0,
                 width: asset.width,

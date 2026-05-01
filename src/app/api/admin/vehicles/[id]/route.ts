@@ -34,6 +34,7 @@ function getVehiclePersistenceErrorMessage(error: unknown) {
     message.includes("Unknown argument `condition`") ||
     message.includes("Unknown argument `category`") ||
     message.includes("Unknown argument `promotionalPrice`") ||
+    message.includes("Unknown argument `version`") ||
     message.includes("The column") ||
     message.includes("does not exist")
   ) {

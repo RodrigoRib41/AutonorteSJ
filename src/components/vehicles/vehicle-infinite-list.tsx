@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Loader2 } from "lucide-react";
+import Link from "next/link";
+import { Loader2, Scale, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { VehicleCard } from "@/components/vehicles/vehicle-card";
@@ -10,6 +11,9 @@ import type {
   VehicleApiRecord,
   VehicleCatalogPageResponse,
 } from "@/lib/vehicle-records";
+import { getVehicleDisplayName } from "@/lib/vehicle-records";
+
+const MAX_COMPARE_VEHICLES = 4;
 
 type VehicleInfiniteListProps = {
   initialVehicles: VehicleApiRecord[];
@@ -51,9 +55,28 @@ export function VehicleInfiniteList({
   const [nextOffset, setNextOffset] = useState(initialVehicles.length);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [selectedVehicleIds, setSelectedVehicleIds] = useState<string[]>([]);
   const unitLabel = totalCount === 1 ? "unidad" : "unidades";
 
   const hasMore = nextOffset < totalCount;
+  const selectedVehicles = selectedVehicleIds
+    .map((id) => vehicles.find((vehicle) => vehicle.id === id))
+    .filter((vehicle): vehicle is VehicleApiRecord => Boolean(vehicle));
+  const compareHref = `/comparar?ids=${selectedVehicleIds.join(",")}`;
+
+  function toggleCompareVehicle(vehicleId: string) {
+    setSelectedVehicleIds((currentIds) => {
+      if (currentIds.includes(vehicleId)) {
+        return currentIds.filter((id) => id !== vehicleId);
+      }
+
+      if (currentIds.length >= MAX_COMPARE_VEHICLES) {
+        return currentIds;
+      }
+
+      return [...currentIds, vehicleId];
+    });
+  }
 
   const loadMore = useCallback(async () => {
     if (isLoadingRef.current || nextOffset >= totalCount) {
@@ -144,12 +167,72 @@ export function VehicleInfiniteList({
         </p>
       </div>
 
+      <div className="rounded-[1.25rem] border border-zinc-950/10 bg-white p-4 shadow-[0_14px_34px_rgba(0,0,0,0.08)]">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="rounded-2xl bg-[var(--brand-primary)] p-3 text-zinc-950">
+              <Scale className="size-5" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-zinc-950">
+                Comparador de autos
+              </p>
+              <p className="mt-1 text-sm leading-6 text-zinc-600">
+                Selecciona hasta {MAX_COMPARE_VEHICLES} unidades para ver sus
+                diferencias lado a lado.
+              </p>
+            </div>
+          </div>
+          {selectedVehicleIds.length >= 2 ? (
+            <Button
+              asChild
+              size="lg"
+              className="h-11 rounded-full bg-zinc-950 px-5 text-[var(--brand-primary)] hover:bg-zinc-900"
+            >
+              <Link href={compareHref}>
+                Comparar {selectedVehicleIds.length}
+              </Link>
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              size="lg"
+              disabled
+              className="h-11 rounded-full bg-zinc-400 px-5 text-white"
+            >
+              Comparar {selectedVehicleIds.length}
+            </Button>
+          )}
+        </div>
+
+        {selectedVehicles.length > 0 ? (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {selectedVehicles.map((vehicle) => (
+              <button
+                key={vehicle.id}
+                type="button"
+                onClick={() => toggleCompareVehicle(vehicle.id)}
+                className="inline-flex max-w-full items-center gap-2 rounded-full border border-zinc-950/10 bg-[var(--brand-soft)] px-3 py-2 text-sm font-medium text-zinc-950"
+              >
+                <span className="truncate">
+                  {getVehicleDisplayName(vehicle)}
+                </span>
+                <X className="size-4 shrink-0" />
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
         {vehicles.map((vehicle, index) => (
           <VehicleCard
             key={vehicle.id}
             vehicle={vehicle}
             preload={index === 0}
+            compareSelected={selectedVehicleIds.includes(vehicle.id)}
+            compareDisabled={selectedVehicleIds.length >= MAX_COMPARE_VEHICLES}
+            onCompareToggle={toggleCompareVehicle}
           />
         ))}
       </div>

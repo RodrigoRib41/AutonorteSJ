@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Award, BadgeCheck, Handshake, Shield } from "lucide-react";
+import {
+  ArrowRight,
+  Award,
+  BadgeCheck,
+  ExternalLink,
+  Handshake,
+  MapPin,
+  Shield,
+} from "lucide-react";
 
 import { BrandLogo } from "@/components/layout/brand-logo";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Quienes somos | TestAutomotores",
@@ -168,6 +177,52 @@ export default function NosotrosPage() {
                   </div>
                 </article>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="py-16 sm:py-20">
+          <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.86fr_1.14fr] lg:items-stretch lg:px-8">
+            <div className="rounded-[1.5rem] border border-zinc-950/12 bg-white p-6 shadow-[0_18px_48px_rgba(0,0,0,0.1)] sm:p-8">
+              <p className="text-sm font-semibold tracking-[0.28em] text-zinc-700 uppercase">
+                Donde estamos
+              </p>
+              <h2 className="mt-4 text-3xl font-semibold tracking-tight text-zinc-950 sm:text-4xl">
+                Visitanos en nuestro local.
+              </h2>
+              <div className="mt-6 flex items-start gap-4 rounded-[1.25rem] border border-zinc-950/10 bg-[var(--brand-soft)] p-5">
+                <div className="rounded-2xl bg-[var(--brand-primary)] p-3 text-zinc-950 shadow-sm">
+                  <MapPin className="size-5" />
+                </div>
+                <p className="text-base leading-7 text-zinc-950">
+                  {siteConfig.contact.address}
+                </p>
+              </div>
+              <Button
+                asChild
+                size="lg"
+                className="mt-6 h-12 rounded-full bg-zinc-950 px-6 text-white hover:bg-zinc-800"
+              >
+                <a
+                  href={siteConfig.contact.mapDirectionsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Como llegar
+                  <ExternalLink className="size-4" />
+                </a>
+              </Button>
+            </div>
+
+            <div className="min-h-[340px] overflow-hidden rounded-[1.5rem] border border-zinc-950/15 bg-white shadow-[0_24px_60px_rgba(0,0,0,0.12)] sm:min-h-[420px]">
+              <iframe
+                title={`Mapa de ${siteConfig.contact.address}`}
+                src={siteConfig.contact.mapEmbedUrl}
+                className="h-full min-h-[340px] w-full border-0 sm:min-h-[420px]"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+              />
             </div>
           </div>
         </section>

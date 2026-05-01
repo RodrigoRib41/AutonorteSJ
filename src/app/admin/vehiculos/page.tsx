@@ -52,6 +52,7 @@ export default async function AdminVehiclesPage({
       id: vehicle.id,
       marca: vehicle.marca,
       modelo: vehicle.modelo,
+      version: vehicle.version,
       condition: vehicle.condition,
       category: vehicle.category,
       anio: vehicle.anio,

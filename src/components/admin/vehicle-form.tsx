@@ -2,9 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useMemo, useState } from "react";
 
+import { VehicleCombobox } from "@/components/admin/vehicle-combobox";
 import { Button } from "@/components/ui/button";
+import {
+  getModelOptionsForBrand,
+  getVersionsForBrandModel,
+  vehicleBrandOptions,
+} from "@/lib/vehicle-model-catalog";
 import {
   emptyVehicleFormValues,
   MAX_FEATURED_VEHICLES,
@@ -56,6 +62,14 @@ export function VehicleForm({ mode, vehicle, featuredVehicles }: VehicleFormProp
   const shouldAskForFeaturedReplacement =
     !vehicle?.destacado &&
     featuredReplacementOptions.length >= MAX_FEATURED_VEHICLES;
+  const modelOptions = useMemo(
+    () => getModelOptionsForBrand(values.marca),
+    [values.marca]
+  );
+  const versionOptions = useMemo(
+    () => getVersionsForBrandModel(values.marca, values.modelo),
+    [values.marca, values.modelo]
+  );
 
   function updateField<K extends keyof VehicleFormValues>(
     field: K,
@@ -68,6 +82,38 @@ export function VehicleForm({ mode, vehicle, featuredVehicles }: VehicleFormProp
     setFieldErrors((current) => ({
       ...current,
       [field]: undefined,
+    }));
+    setErrorMessage("");
+    setSuccessMessage("");
+  }
+
+  function updateBrand(value: string) {
+    setValues((current) => ({
+      ...current,
+      marca: value,
+      modelo: "",
+      version: "",
+    }));
+    setFieldErrors((current) => ({
+      ...current,
+      marca: undefined,
+      modelo: undefined,
+      version: undefined,
+    }));
+    setErrorMessage("");
+    setSuccessMessage("");
+  }
+
+  function updateModel(value: string) {
+    setValues((current) => ({
+      ...current,
+      modelo: value,
+      version: "",
+    }));
+    setFieldErrors((current) => ({
+      ...current,
+      modelo: undefined,
+      version: undefined,
     }));
     setErrorMessage("");
     setSuccessMessage("");
@@ -131,6 +177,7 @@ export function VehicleForm({ mode, vehicle, featuredVehicles }: VehicleFormProp
         body: JSON.stringify({
           marca: values.marca,
           modelo: values.modelo,
+          version: values.version,
           condition: values.condition,
           category: values.category,
           anio: Number(values.anio),
@@ -203,35 +250,45 @@ export function VehicleForm({ mode, vehicle, featuredVehicles }: VehicleFormProp
   return (
     <form onSubmit={handleSubmit} className="space-y-6" noValidate>
       <div className="grid gap-5 lg:grid-cols-2">
-        <label className="space-y-2">
-          <span className="text-sm font-medium text-zinc-700">Marca</span>
-          <input
-            type="text"
-            value={values.marca}
-            onChange={(event) => updateField("marca", event.target.value)}
-            className={inputClassName}
-            placeholder="Toyota"
-            required
-          />
-          {fieldErrors.marca ? (
-            <p className="text-sm text-red-600">{fieldErrors.marca}</p>
-          ) : null}
-        </label>
+        <VehicleCombobox
+          label="Marca"
+          value={values.marca}
+          options={vehicleBrandOptions}
+          placeholder="Elegir marca"
+          emptyMessage="No encontramos marcas con ese texto."
+          errorMessage={fieldErrors.marca}
+          required
+          onChange={updateBrand}
+        />
 
-        <label className="space-y-2">
-          <span className="text-sm font-medium text-zinc-700">Modelo</span>
-          <input
-            type="text"
-            value={values.modelo}
-            onChange={(event) => updateField("modelo", event.target.value)}
-            className={inputClassName}
-            placeholder="Corolla SEG CVT"
-            required
-          />
-          {fieldErrors.modelo ? (
-            <p className="text-sm text-red-600">{fieldErrors.modelo}</p>
-          ) : null}
-        </label>
+        <VehicleCombobox
+          label="Modelo"
+          value={values.modelo}
+          options={modelOptions}
+          placeholder={values.marca ? "Elegir modelo" : "Primero elegi marca"}
+          emptyMessage="No hay modelos cargados para esa busqueda."
+          helpText={
+            values.marca
+              ? "Los modelos se ajustan segun la marca elegida."
+              : undefined
+          }
+          errorMessage={fieldErrors.modelo}
+          required
+          disabled={!values.marca}
+          onChange={updateModel}
+        />
+
+        <VehicleCombobox
+          label="Version opcional"
+          value={values.version}
+          options={versionOptions}
+          placeholder={values.modelo ? "Elegir version" : "Primero elegi modelo"}
+          emptyMessage="No hay versiones cargadas para esa busqueda."
+          helpText="Ejemplo: SRV 4x4, Highline, LTZ o Pack III."
+          errorMessage={fieldErrors.version}
+          disabled={!values.modelo}
+          onChange={(value) => updateField("version", value)}
+        />
 
         <label className="space-y-2">
           <span className="text-sm font-medium text-zinc-700">

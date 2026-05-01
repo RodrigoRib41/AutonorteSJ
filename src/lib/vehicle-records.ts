@@ -67,6 +67,7 @@ export type VehicleImagePersisted = VehiclePersisted["images"][number];
 export type VehiclePayload = {
   marca: string;
   modelo: string;
+  version: string | null;
   condition: VehicleCondition;
   category: VehicleCategory;
   anio: number;
@@ -97,6 +98,7 @@ export type VehiclePreview = Pick<
   | "id"
   | "marca"
   | "modelo"
+  | "version"
   | "condition"
   | "category"
   | "anio"
@@ -134,6 +136,7 @@ export type VehicleApiRecord = VehiclePayload & {
 export type VehicleFormValues = {
   marca: string;
   modelo: string;
+  version: string;
   condition: VehicleCondition;
   category: VehicleCategory;
   anio: string;
@@ -232,6 +235,7 @@ export type VehicleBulkDeleteResponse =
 export const emptyVehicleFormValues: VehicleFormValues = {
   marca: "",
   modelo: "",
+  version: "",
   condition: "USED",
   category: "CAR",
   anio: "",
@@ -268,6 +272,11 @@ function asInteger(value: unknown) {
 function asOptionalInteger(value: unknown) {
   const parsedValue = asInteger(value);
   return Number.isInteger(parsedValue) ? parsedValue : null;
+}
+
+function asOptionalPositiveInteger(value: unknown) {
+  const parsedValue = asOptionalInteger(value);
+  return parsedValue && parsedValue > 0 ? parsedValue : null;
 }
 
 function asBoolean(value: unknown) {
@@ -327,12 +336,13 @@ export function parseVehiclePayload(input: unknown): VehiclePayload {
   return {
     marca: asString(data.marca),
     modelo: asString(data.modelo),
+    version: asString(data.version) || null,
     condition: asCondition(data.condition),
     category: asCategory(data.category),
     anio: asInteger(data.anio),
     kilometraje: asInteger(data.kilometraje),
     precio: asInteger(data.precio),
-    promotionalPrice: asOptionalInteger(data.promotionalPrice),
+    promotionalPrice: asOptionalPositiveInteger(data.promotionalPrice),
     currency: asCurrency(data.currency),
     descripcion: descripcion || null,
     destacado: asBoolean(data.destacado),
@@ -351,6 +361,10 @@ export function validateVehiclePayload(
 
   if (payload.modelo.length < 2) {
     errors.modelo = "Ingresa un modelo valido.";
+  }
+
+  if (payload.version && payload.version.length < 2) {
+    errors.version = "Ingresa una version valida.";
   }
 
   if (!vehicleConditions.includes(payload.condition)) {
@@ -447,6 +461,7 @@ export function serializeVehicle(vehicle: VehiclePersisted): VehicleApiRecord {
     id: vehicle.id,
     marca: vehicle.marca,
     modelo: vehicle.modelo,
+    version: vehicle.version,
     condition: vehicle.condition,
     category: vehicle.category,
     anio: vehicle.anio,
@@ -467,6 +482,7 @@ export function vehicleToFormValues(
     VehiclePreview,
     | "marca"
     | "modelo"
+    | "version"
     | "condition"
     | "category"
     | "anio"
@@ -481,6 +497,7 @@ export function vehicleToFormValues(
   return {
     marca: vehicle.marca,
     modelo: vehicle.modelo,
+    version: vehicle.version ?? "",
     condition: vehicle.condition,
     category: vehicle.category,
     anio: String(vehicle.anio),
@@ -496,9 +513,15 @@ export function vehicleToFormValues(
 }
 
 export function getVehicleDisplayName(
-  vehicle: Pick<VehiclePreview, "marca" | "modelo">
+  vehicle: {
+    marca: string;
+    modelo: string;
+    version?: string | null;
+  }
 ) {
-  return `${vehicle.marca} ${vehicle.modelo}`;
+  return [vehicle.marca, vehicle.modelo, vehicle.version]
+    .filter(Boolean)
+    .join(" ");
 }
 
 export function getVehiclePrimaryImage(

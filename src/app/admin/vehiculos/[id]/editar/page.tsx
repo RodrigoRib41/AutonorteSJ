@@ -6,7 +6,10 @@ import { requireAdminPageAccess, vehicleManagerRoles } from "@/lib/admin-auth";
 import { getAdminDisplayName } from "@/lib/admin-users";
 import { getFeaturedVehicleReplacementOptions } from "@/lib/vehicle-featured";
 import { getVehicleById } from "@/lib/vehicle-queries";
-import { serializeVehicleImage } from "@/lib/vehicle-records";
+import {
+  getVehicleDisplayName,
+  serializeVehicleImage,
+} from "@/lib/vehicle-records";
 
 type EditVehiclePageProps = {
   params: Promise<{ id: string }>;
@@ -33,6 +36,7 @@ export default async function EditVehiclePage({
   const featuredVehicles = await getFeaturedVehicleReplacementOptions(
     vehicle.id
   );
+  const vehicleName = getVehicleDisplayName(vehicle);
 
   const auditItems = [
     {
@@ -56,7 +60,7 @@ export default async function EditVehiclePage({
           Edicion de vehiculo
         </p>
         <h2 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-950 sm:text-4xl">
-          {vehicle.marca} {vehicle.modelo}
+          {vehicleName}
         </h2>
         <p className="mt-4 max-w-3xl text-base leading-8 text-zinc-600 sm:text-lg">
           Edita los datos, fotos y precio de la unidad.
@@ -100,7 +104,7 @@ export default async function EditVehiclePage({
         <VehicleImageUploader
           key={`${vehicle.id}-${vehicle.updatedAt.toISOString()}`}
           vehicleId={vehicle.id}
-          vehicleName={`${vehicle.marca} ${vehicle.modelo}`}
+          vehicleName={vehicleName}
           initialImages={vehicle.images.map(serializeVehicleImage)}
           showCreateAnotherAction={wasJustCreated}
         />

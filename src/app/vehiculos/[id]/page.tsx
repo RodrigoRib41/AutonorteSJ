@@ -21,6 +21,7 @@ import {
   formatPrecio,
   getVehicleCategoryLabel,
   getVehicleConditionLabel,
+  getVehicleDisplayName,
   getVehicleDisplayPrice,
   hasVehiclePromotion,
   serializeVehicleImage,
@@ -44,6 +45,7 @@ export default async function VehicleDetailPage({
 
   const hasPromotion = hasVehiclePromotion(vehicle);
   const displayPrice = getVehicleDisplayPrice(vehicle);
+  const vehicleName = getVehicleDisplayName(vehicle);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -70,7 +72,7 @@ export default async function VehicleDetailPage({
             <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
               <div className="rounded-[2rem] border border-zinc-950/15 bg-white p-6 shadow-[0_28px_70px_rgba(0,0,0,0.16)] sm:p-8">
                 <VehicleGallery
-                  vehicleName={`${vehicle.marca} ${vehicle.modelo}`}
+                  vehicleName={vehicleName}
                   images={vehicle.images.map(serializeVehicleImage)}
                 />
 
@@ -113,7 +115,7 @@ export default async function VehicleDetailPage({
                     ) : null}
                   </div>
                   <h2 className="mt-3 text-4xl font-semibold tracking-tight text-zinc-950 sm:text-5xl">
-                    {vehicle.marca} {vehicle.modelo}
+                    {vehicleName}
                   </h2>
                   {vehicle.descripcion ? (
                     <p className="mt-6 max-w-2xl text-base leading-8 text-zinc-900 sm:text-lg">
@@ -177,6 +179,17 @@ export default async function VehicleDetailPage({
                       </p>
                     </div>
 
+                    {vehicle.version ? (
+                      <div className="rounded-[1.5rem] border border-zinc-950/10 bg-[var(--brand-soft)] p-5">
+                        <p className="text-xs font-semibold tracking-[0.18em] text-zinc-600 uppercase">
+                          Version
+                        </p>
+                        <p className="mt-3 text-lg font-semibold text-zinc-950">
+                          {vehicle.version}
+                        </p>
+                      </div>
+                    ) : null}
+
                     {hasPromotion ? (
                       <div className="rounded-[1.5rem] border border-zinc-950/15 bg-[var(--brand-primary)] p-5 sm:col-span-2">
                         <p className="text-xs font-semibold tracking-[0.18em] text-zinc-800 uppercase">
@@ -213,7 +226,7 @@ export default async function VehicleDetailPage({
                   <div className="mt-8">
                     <VehicleInquiryForm
                       vehicleId={vehicle.id}
-                      vehicleName={`${vehicle.marca} ${vehicle.modelo}`}
+                      vehicleName={vehicleName}
                     />
                   </div>
 

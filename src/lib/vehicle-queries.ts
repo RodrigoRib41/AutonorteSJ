@@ -66,6 +66,29 @@ export async function getVehicleById(
   });
 }
 
+export async function getVehiclesByIds(ids: string[]): Promise<VehiclePersisted[]> {
+  if (ids.length === 0) {
+    return [];
+  }
+
+  const vehicles = await getPrismaClient().vehicle.findMany({
+    include: vehicleWithImagesInclude,
+    where: {
+      id: {
+        in: ids,
+      },
+      deletedAt: null,
+    },
+  });
+  const order = new Map(ids.map((id, index) => [id, index]));
+
+  return vehicles.sort(
+    (firstVehicle, secondVehicle) =>
+      (order.get(firstVehicle.id) ?? Number.MAX_SAFE_INTEGER) -
+      (order.get(secondVehicle.id) ?? Number.MAX_SAFE_INTEGER)
+  );
+}
+
 export async function getVehicleCount(filters?: VehicleFilterValues) {
   return getPrismaClient().vehicle.count({
     where: filters ? getVehicleWhereInput(filters) : activeVehicleWhere,
